@@ -100,6 +100,7 @@
       <AdditionalIncludeDirectories>../libs/include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <StructMemberAlignment>Default</StructMemberAlignment>
+      <UseFullPaths>true</UseFullPaths>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -168,6 +169,7 @@
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\material.cpp" />
     <ClCompile Include="..\..\src\mesh.cpp" />
+    <ClCompile Include="..\..\src\rendercall.cpp" />
     <ClCompile Include="..\..\src\renderer.cpp" />
     <ClCompile Include="..\..\src\prefab.cpp" />
     <ClCompile Include="..\..\src\scene.cpp" />
@@ -218,6 +220,7 @@
     <ClInclude Include="..\..\src\input.h" />
     <ClInclude Include="..\..\src\material.h" />
     <ClInclude Include="..\..\src\mesh.h" />
+    <ClInclude Include="..\..\src\rendercall.h" />
     <ClInclude Include="..\..\src\renderer.h" />
     <ClInclude Include="..\..\src\prefab.h" />
     <ClInclude Include="..\..\src\scene.h" />

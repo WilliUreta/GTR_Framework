@@ -1,0 +1,11 @@
+Model Information:
+* title:	Revolver Westwood ElDorado
+* source:	https://sketchfab.com/3d-models/revolver-westwood-eldorado-b13b61a5b4094b2ab7a9d998ef4c1788
+* author:	kajindd (https://sketchfab.com/kajindd)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Revolver Westwood ElDorado" (https://sketchfab.com/3d-models/revolver-westwood-eldorado-b13b61a5b4094b2ab7a9d998ef4c1788) by kajindd (https://sketchfab.com/kajindd) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

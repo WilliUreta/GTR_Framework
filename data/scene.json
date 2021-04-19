@@ -7,12 +7,19 @@
 			"position":[0,0,0]
 		},
 		{
-			"name":"house",
-			"type":"PREFAB",
-			"filename":"prefabs/house_test/scene.gltf",
-			"position":[300,0,0],
-			"angle":45,
-			"scale":[0.3,0.3,0.3]
+			"name": "house",
+			"type": "PREFAB",
+			"filename": "prefabs/house_test/scene.gltf",
+			"position": [ 300, 0, 0 ],
+			"angle": 45,
+			"scale": [ 0.2, 0.2, 0.2 ]
+		},
+		{
+			"name": "revolver",
+			"type": "PREFAB",
+			"filename": "prefabs/revolver_westwood_eldorado/scene.gltf",
+			"position": [ 55, 60, 50 ],
+			"angle": 45
 		}
 	]
 }

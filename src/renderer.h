@@ -1,6 +1,8 @@
 #pragma once
 #include "prefab.h"
 
+#include "rendercall.h"
+
 //forward declarations
 class Camera;
 
@@ -8,6 +10,9 @@ namespace GTR {
 
 	class Prefab;
 	class Material;
+	
+	//afegit per mi
+	
 	
 	// This class is in charge of rendering anything in our system.
 	// Separating the render from anything else makes the code cleaner
@@ -31,6 +36,7 @@ namespace GTR {
 		//to render one mesh given its material and transformation matrix
 		void renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera);
 	};
+
 
 	Texture* CubemapFromHDRE(const char* filename);
 

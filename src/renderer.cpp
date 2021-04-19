@@ -10,6 +10,8 @@
 #include "scene.h"
 #include "extra/hdre.h"
 
+#include "rendercall.h"
+
 
 using namespace GTR;
 
@@ -57,6 +59,7 @@ void Renderer::renderNode(const Matrix44& prefab_model, GTR::Node* node, Camera*
 		//if bounding box is inside the camera frustum then the object is probably visible
 		if (camera->testBoxInFrustum(world_bounding.center, world_bounding.halfsize) )
 		{
+
 			//render node mesh
 			renderMeshWithMaterial( node_model, node->mesh, node->material, camera );
 			//node->mesh->renderBounding(node_model, true);
@@ -89,10 +92,10 @@ void Renderer::renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Mat
 		texture = Texture::getWhiteTexture(); //a 1x1 white texture
 
 	//select the blending
-	if (material->alpha_mode == GTR::eAlphaMode::BLEND)
+	if (material->alpha_mode == GTR::eAlphaMode::BLEND)		//Si te alpha_mode blend, vol dir que té transparencies
 	{
 		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);	// Millor metode per transparencies. De + far a + close https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glBlendFunc.xml
 	}
 	else
 		glDisable(GL_BLEND);
@@ -157,3 +160,4 @@ Texture* GTR::CubemapFromHDRE(const char* filename)
 	*/
 	return NULL;
 }
+

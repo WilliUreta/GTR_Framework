@@ -22,6 +22,7 @@ Camera* camera = nullptr;
 GTR::Scene* scene = nullptr;
 GTR::Prefab* prefab = nullptr;
 GTR::Renderer* renderer = nullptr;
+GTR::RenderCall* renderCall = nullptr;
 GTR::BaseEntity* selected_entity = nullptr;
 FBO* fbo = nullptr;
 Texture* texture = nullptr;
@@ -73,6 +74,9 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	//This class will be the one in charge of rendering all 
 	renderer = new GTR::Renderer(); //here so we have opengl ready in constructor
 
+	//NOU!!
+	renderCall = new GTR::RenderCall();
+
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse
 }
@@ -106,6 +110,10 @@ void Application::render(void)
 	//lets render something
 	//Matrix44 model;
 	//renderer->renderPrefab( model, prefab, camera );
+
+	renderCall->saveScene(scene, camera);
+
+	//renderCall->renderCall_data[0].node;		Com accedir a les dades.
 
 	renderer->renderScene(scene, camera);
 
@@ -292,7 +300,7 @@ void Application::onKeyDown( SDL_KeyboardEvent event )
 		case SDLK_ESCAPE: must_exit = true; break; //ESC key, kill the app
 		case SDLK_F1: render_debug = !render_debug; break;
 		case SDLK_f: camera->center.set(0, 0, 0); camera->updateViewMatrix(); break;
-		case SDLK_F5: Shader::ReloadAll(); break;
+		case SDLK_F4: Shader::ReloadAll(); break;		//No em va el F5...
 		case SDLK_F6: scene->clear(); scene->load(scene->filename.c_str()); break;
 	}
 }
