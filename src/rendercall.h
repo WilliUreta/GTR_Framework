@@ -34,6 +34,14 @@ namespace GTR {
 			//Texture* texture = NULL; 
 		};
 		
+		struct orderer_alpha {		//https://stackoverflow.com/questions/1380463/sorting-a-vector-of-custom-objects
+
+			inline bool operator() (data& rc_a, data& rc_b) {
+
+				return(rc_a.node->material->alpha_mode > rc_b.node->material->alpha_mode);		//Blend = 2, Mask 1, no alpha =0, volem  primer els 2.
+			}
+		};
+
 		std::vector<data> renderCall_data;
 
 
