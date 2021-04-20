@@ -111,11 +111,21 @@ void Application::render(void)
 	//Matrix44 model;
 	//renderer->renderPrefab( model, prefab, camera );
 
+	//Buidar rendercall_data
+	
+	renderCall->renderCall_data.clear();
+
 	renderCall->saveScene(scene, camera);
+	//renderCall->orderRenderCall();		//Necessita passar-li algo? ho te tot guardat a this?
 
-	//renderCall->renderCall_data[0].node;		Com accedir a les dades.
+		
+	for (int i = 0; i < renderCall->renderCall_data.size(); ++i) {			//Render directe del vector de renderCalls, "ordenat"
 
-	renderer->renderScene(scene, camera);
+
+		renderer->renderMeshWithMaterial(renderCall->renderCall_data[i].node_model, renderCall->renderCall_data[i].node->mesh, renderCall->renderCall_data[i].node->material, camera);
+	}
+
+	//renderer->renderScene(scene, camera);
 
 	//Draw the floor grid, helpful to have a reference point
 	if(render_debug)

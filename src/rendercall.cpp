@@ -11,6 +11,8 @@
 #include "scene.h"
 #include "extra/hdre.h"
 
+#include <algorithm>	//Afegit per mi
+
 
 
 using namespace GTR;
@@ -103,13 +105,13 @@ void GTR::RenderCall::saveRenderCall(const Matrix44& prefab_model, GTR::Node* no
 {
 }
 
-void GTR::RenderCall::orderRenderCall(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera)
+void GTR::RenderCall::orderRenderCall()
 {
 
 	//Reordenar
-
-	//Bones, crec que he aconseguit guardar correctament la info per als render calls, però sóc incapaç de trobar els metodes / funcions que stl / std ens ofereix(com el sort amb lamda) per reordenar - los depenent.Algu em podria apuntar cap alguna web / fitxer on buscar ? ?
-
+	std::sort(this->renderCall_data.begin(), this->renderCall_data.end(), orderer_alpha());
+	
+	
 }
 
 
