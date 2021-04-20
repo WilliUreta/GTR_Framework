@@ -112,15 +112,13 @@ void Application::render(void)
 	//renderer->renderPrefab( model, prefab, camera );
 
 	//Buidar rendercall_data
-	
 	renderCall->renderCall_data.clear();
 
 	renderCall->saveScene(scene, camera);
-	//renderCall->orderRenderCall();		//Necessita passar-li algo? ho te tot guardat a this?
+	renderCall->orderRenderCall();		//Necessita passar-li algo? ho te tot guardat a this?
 
 		
 	for (int i = 0; i < renderCall->renderCall_data.size(); ++i) {			//Render directe del vector de renderCalls, "ordenat"
-
 
 		renderer->renderMeshWithMaterial(renderCall->renderCall_data[i].node_model, renderCall->renderCall_data[i].node->mesh, renderCall->renderCall_data[i].node->material, camera);
 	}
