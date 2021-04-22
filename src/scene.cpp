@@ -107,7 +107,7 @@ bool GTR::Scene::load(const char* filename)
 	return true;
 }
 
-GTR::BaseEntity* GTR::Scene::createEntity(std::string type)
+GTR::BaseEntity* GTR::Scene::createEntity(std::string type)		//Modificar quan volguem més identitats diferents
 {
 	if (type == "PREFAB")
 		return new GTR::PrefabEntity();
@@ -133,7 +133,7 @@ GTR::PrefabEntity::PrefabEntity()
 	prefab = NULL;
 }
 
-void GTR::PrefabEntity::configure(cJSON* json)
+void GTR::PrefabEntity::configure(cJSON* json)		//Modificar per altres entitats
 {
 	if (cJSON_GetObjectItem(json, "filename"))
 	{

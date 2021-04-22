@@ -110,8 +110,10 @@ void GTR::RenderCall::orderRenderCall()
 
 	//Reordenar
 	std::sort(this->renderCall_data.begin(), this->renderCall_data.end(), orderer_alpha());
-	
-	
+	//tenir en compte la bounding box per trobar el centre de l'objecte. Calcular
+	//guardar BoundingBox.center a rendercall
+	//Yo lo que hago es calcular la distancia entre la posición de cámara y node_model*(0,0,0), pero en cada rendercall tengo un puntero a la cámara, cosa con menos sentido que guardar el centro de la bounding box
+	//Precalcular la distancia i guardarho al rendercall. Potser sense arrel quadrada (Distancia manhattan)
 }
 
 

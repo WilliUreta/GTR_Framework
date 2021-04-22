@@ -10,7 +10,7 @@
 			"name": "car2",
 			"type": "PREFAB",
 			"filename": "prefabs/gmc/scene.gltf",
-			"position": [ -125, 0, 0 ]
+			"position": [ -175, 0, 0 ]
 		},
 		{
 			"name": "house",
