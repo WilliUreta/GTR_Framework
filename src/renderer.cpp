@@ -90,6 +90,7 @@ void Renderer::renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Mat
 	//define locals to simplify coding
 	Shader* shader = NULL;
 	Texture* texture = NULL;
+	GTR::Scene* scene = GTR::Scene::instance;	//Per tenir background i ambient light
 
 	texture = material->color_texture.texture;
 	//texture = material->emissive_texture;

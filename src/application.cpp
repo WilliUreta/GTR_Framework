@@ -86,6 +86,13 @@ void Application::render(void)
 	//be sure no errors present in opengl before start
 	checkGLErrors();
 
+	//set the clear color (the background color)
+	glClearColor(scene->background_color.x, scene->background_color.y, scene->background_color.z, 1.0);
+
+	// Clear the color and the depth buffer
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	checkGLErrors();
+
 	//set the camera as default (used by some functions in the framework)
 	camera->enable();
 

@@ -54,6 +54,7 @@ namespace GTR {
 
 		std::vector<data> renderCall_data;
 
+		//void RenderCall::RenderCall();
 
 		//Guardar les dades de mesh, material, flags, model... enlloc de passar-les al shader.
 		//Copia't de renderer, recorrer tots els nodes, i al final, guardar les dades

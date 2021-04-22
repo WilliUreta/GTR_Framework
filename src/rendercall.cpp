@@ -23,6 +23,12 @@ GTR::RenderCall::RenderCall()
 	//this->NodeVec = 
 }*/
 
+/*
+GTR::RenderCall::RenderCall()
+{
+
+	//this->renderCall_data = NULL;
+}*/
 
 void GTR::RenderCall::saveScene(GTR::Scene* scene, Camera* camera)
 {

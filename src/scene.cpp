@@ -112,6 +112,7 @@ bool GTR::Scene::load(const char* filename)
 	return true;
 }
 
+
 GTR::BaseEntity* GTR::Scene::createEntity(std::string type)		//Modificar quan volguem més identitats diferents
 {
 	if (type == "PREFAB")

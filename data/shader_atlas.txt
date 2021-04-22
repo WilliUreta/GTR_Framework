@@ -3,6 +3,7 @@ flat basic.vs flat.fs
 texture basic.vs texture.fs
 depth quad.vs depth.fs
 multi basic.vs multi.fs
+light_singlepass basic.vs light_singlepass.fs
 
 \basic.vs
 
@@ -59,7 +60,6 @@ void main()
 	v_uv = a_coord;
 	gl_Position = vec4( a_vertex, 1.0 );
 }
-
 
 \flat.fs
 
@@ -137,6 +137,37 @@ void main()
 	NormalColor = vec4(N,1.0);
 }
 
+\light_singlepass.fs
+
+#version 330 core
+
+in vec3 v_position;
+in vec3 v_world_position;
+in vec3 v_normal;
+in vec2 v_uv;
+
+uniform vec4 u_color;
+uniform sampler2D u_texture;
+uniform float u_time;
+uniform float u_alpha_cutoff;
+
+layout(location = 0) out vec4 FragColor;
+layout(location = 1) out vec4 NormalColor;
+
+void main()
+{
+	vec2 uv = v_uv;
+	vec4 color = u_color;
+	color *= texture( u_texture, uv );
+
+	if(color.a < u_alpha_cutoff)
+		discard;
+
+	vec3 N = normalize(v_normal);
+
+	FragColor = color;
+	NormalColor = vec4(N,1.0);
+}
 
 \depth.fs
 
@@ -155,7 +186,6 @@ void main()
 	float color = n * (z + 1.0) / (f + n - z * (f - n));
 	FragColor = vec4(color);
 }
-
 
 \instanced.vs
 
