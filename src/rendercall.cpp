@@ -80,7 +80,10 @@ void GTR::RenderCall::saveNode(const Matrix44& prefab_model, GTR::Node* node, Ca
 			//node->mesh->renderBounding(node_model, true);
 
 			//cal temp_data? repassar instanciacio de structs, punters etc............
-			data temp_data = { node_model, node};
+			
+			float dist = camera->eye.distance(world_bounding.center);
+
+			data temp_data = { node_model, node, dist};
 			this->renderCall_data.push_back(temp_data);
 
 		}
@@ -113,13 +116,9 @@ void GTR::RenderCall::saveRenderCall(const Matrix44& prefab_model, GTR::Node* no
 
 void GTR::RenderCall::orderRenderCall()
 {
-
 	//Reordenar
+	std::sort(this->renderCall_data.begin(), this->renderCall_data.end(), orderer_distance());
 	std::sort(this->renderCall_data.begin(), this->renderCall_data.end(), orderer_alpha());
-	//tenir en compte la bounding box per trobar el centre de l'objecte. Calcular
-	//guardar BoundingBox.center a rendercall
-	//Yo lo que hago es calcular la distancia entre la posición de cámara y node_model*(0,0,0), pero en cada rendercall tengo un puntero a la cámara, cosa con menos sentido que guardar el centro de la bounding box
-	//Precalcular la distancia i guardarho al rendercall. Potser sense arrel quadrada (Distancia manhattan)
 }
 
 

@@ -29,6 +29,7 @@ namespace GTR {
 		{
 			Matrix44 node_model;
 			Node* node;		//Node te mesh, material
+			float distance;
 			//Camera* camera;	//Necessitem camera???
 			//Shader* shader = NULL;
 			//Texture* texture = NULL; 
@@ -42,15 +43,13 @@ namespace GTR {
 			}
 		};
 
-		/*
-		struct orderer_distance {	
+		struct orderer_distance {		//https://stackoverflow.com/questions/1380463/sorting-a-vector-of-custom-objects
 
 			inline bool operator() (data& rc_a, data& rc_b) {
-
-				return(rc_a.node_model.getXYZ );		//Blend = 2, Mask 1, no alpha =0, volem  primer els 2.
+				
+				return(rc_a.distance < rc_b.distance);		//Si esta mes lluny, primer
 			}
-		};*/
-		
+		};
 
 		std::vector<data> renderCall_data;
 
