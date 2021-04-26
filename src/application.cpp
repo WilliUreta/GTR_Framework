@@ -86,13 +86,6 @@ void Application::render(void)
 	//be sure no errors present in opengl before start
 	checkGLErrors();
 
-	//set the clear color (the background color)
-	glClearColor(scene->background_color.x, scene->background_color.y, scene->background_color.z, 1.0);
-
-	// Clear the color and the depth buffer
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	checkGLErrors();
-
 	//set the camera as default (used by some functions in the framework)
 	camera->enable();
 
@@ -110,17 +103,7 @@ void Application::render(void)
 	//Matrix44 model;
 	//renderer->renderPrefab( model, prefab, camera );
 
-	//Buidar rendercall_data
-	renderCall->renderCall_data.clear();
-
-	renderCall->saveScene(scene, camera);
-	renderCall->orderRenderCall();		//Necessita passar-li algo? ho te tot guardat a this?
-
-		
-	for (int i = 0; i < renderCall->renderCall_data.size(); ++i) {			//Render directe del vector de renderCalls, "ordenat"
-
-		renderer->renderMeshWithMaterial(renderCall->renderCall_data[i].node_model, renderCall->renderCall_data[i].node->mesh, renderCall->renderCall_data[i].node->material, camera);
-	}
+	renderCall->renderScene(scene, camera, renderer);
 
 	//renderer->renderScene(scene, camera);
 

@@ -11,9 +11,7 @@ namespace GTR {
 	class Prefab;
 	class Material;
 	
-	//afegit per mi
-	
-	
+	enum eRenderMode { SINGLE_PATH, MULTI_PATH }; //types of cameras available
 	// This class is in charge of rendering anything in our system.
 	// Separating the render from anything else makes the code cleaner
 	class Renderer
@@ -21,6 +19,7 @@ namespace GTR {
 
 	public:
 
+		eRenderMode renderMode;
 		//add here your functions
 		//...
 

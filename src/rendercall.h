@@ -4,6 +4,7 @@
 
 #include "framework.h"
 #include "prefab.h"
+#include "renderer.h"
 
 
 //forward declarations
@@ -13,6 +14,7 @@ namespace GTR {
 
 	class Prefab;
 	class Material;
+	class Renderer;
 
 
 	class RenderCall {
@@ -62,10 +64,9 @@ namespace GTR {
 		void saveNode(const Matrix44& prefab_model, GTR::Node* node, Camera* camera);
 		void saveMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera);
 
-		//sobra save?
-		void saveRenderCall(const Matrix44& prefab_model, GTR::Node* node, Camera* camera);
 		void orderRenderCall();
 
+		void renderScene(GTR::Scene* scene, Camera* camera, GTR::Renderer* renderer);
 		//void orderRenderCall(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera);
 
 

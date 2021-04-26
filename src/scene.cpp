@@ -117,7 +117,10 @@ GTR::BaseEntity* GTR::Scene::createEntity(std::string type)		//Modificar quan vo
 {
 	if (type == "PREFAB")
 		return new GTR::PrefabEntity();
-    return NULL;
+	if (type == "LIGHT")
+		return new GTR::LightEntity();
+	else
+		return NULL;
 }
 
 void GTR::BaseEntity::renderInMenu()
@@ -162,3 +165,39 @@ void GTR::PrefabEntity::renderInMenu()
 #endif
 }
 
+
+
+GTR::LightEntity::LightEntity()
+{
+	entity_type = LIGHT;
+}
+
+void GTR::LightEntity::configure(cJSON* json)		//Modificar per altres entitats
+{
+	if (cJSON_GetObjectItem(json, "distance"))
+	{
+		this->max_distance = cJSON_GetObjectItem(json, "distance")->valuedouble;
+	}
+	if (cJSON_GetObjectItem(json, "cone_angle"))
+	{
+		this->cone_angle = cJSON_GetObjectItem(json, "distance")->valuedouble;
+	}
+	if (cJSON_GetObjectItem(json, "area_size"))
+	{
+		this->area_size = cJSON_GetObjectItem(json, "distance")->valuedouble;
+	}
+}
+
+void GTR::LightEntity::renderInMenu()
+{
+	BaseEntity::renderInMenu();
+
+#ifndef SKIP_IMGUI
+	/*ImGui::Text("filename: %s", filename.c_str()); // Edit 3 floats representing a color
+	if (prefab && ImGui::TreeNode(prefab, "Prefab Info"))
+	{
+		prefab->root.renderInMenu();
+		ImGui::TreePop();
+	}*/
+#endif
+}

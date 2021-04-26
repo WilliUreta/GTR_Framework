@@ -48,7 +48,7 @@ void GTR::RenderCall::saveScene(GTR::Scene* scene, Camera* camera)
 	}
 }
 
-//renders all the prefab
+
 void GTR::RenderCall::savePrefab(const Matrix44& model, GTR::Prefab* prefab, Camera* camera)
 {
 	assert(prefab && "PREFAB IS NULL");
@@ -103,15 +103,6 @@ void GTR::RenderCall::saveMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR
 
 	//material->alpha_mode diu si té transparencies
 
-	
-
-}
-
-
-//sobra save
-
-void GTR::RenderCall::saveRenderCall(const Matrix44& prefab_model, GTR::Node* node, Camera* camera)
-{
 }
 
 void GTR::RenderCall::orderRenderCall()
@@ -119,6 +110,32 @@ void GTR::RenderCall::orderRenderCall()
 	//Reordenar
 	std::sort(this->renderCall_data.begin(), this->renderCall_data.end(), orderer_distance());
 	std::sort(this->renderCall_data.begin(), this->renderCall_data.end(), orderer_alpha());
+}
+
+void GTR::RenderCall::renderScene(GTR::Scene* scene, Camera* camera, GTR::Renderer* renderer)
+{
+	
+	//Buidar rendercall_data
+	this->renderCall_data.clear();
+
+	this->saveScene(scene, camera);
+	this->orderRenderCall();		//Necessita passar-li algo? ho te tot guardat a this?
+
+	//Posar-ho dins una funcio??									
+	//set the clear color (the background color)
+	glClearColor(scene->background_color.x, scene->background_color.y, scene->background_color.z, 1.0);
+
+	// Clear the color and the depth buffer
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	checkGLErrors();
+
+	for (int i = 0; i < this->renderCall_data.size(); ++i) {			//Render directe del vector de renderCalls, "ordenat"
+		//Podre accedir a scene->ambient_light?
+
+		renderer->renderMeshWithMaterial(this->renderCall_data[i].node_model, this->renderCall_data[i].node->mesh, this->renderCall_data[i].node->material, camera);
+	}
+
+
 }
 
 
