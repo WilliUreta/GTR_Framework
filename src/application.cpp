@@ -103,9 +103,10 @@ void Application::render(void)
 	//Matrix44 model;
 	//renderer->renderPrefab( model, prefab, camera );
 
-	renderCall->renderScene(scene, camera, renderer);
+	//renderCall->renderScene(scene, camera, renderer);
 
-	//renderer->renderScene(scene, camera);
+	renderer->renderScene(scene, camera);
+	renderer->renderRenderCall(camera);
 
 	//Draw the floor grid, helpful to have a reference point
 	if(render_debug)
@@ -293,6 +294,10 @@ void Application::onKeyDown( SDL_KeyboardEvent event )
 		case SDLK_f: camera->center.set(0, 0, 0); camera->updateViewMatrix(); break;
 		case SDLK_F4: Shader::ReloadAll(); break;		//No em va el F5...
 		case SDLK_F6: scene->clear(); scene->load(scene->filename.c_str()); break;
+		case SDLK_1: renderer->render_mode = GTR::eRenderMode::NORMALS; break;
+		case SDLK_2: renderer->render_mode = GTR::eRenderMode::TEXTURE; break;
+		case SDLK_3: renderer->render_mode = GTR::eRenderMode::UVS; break;
+		case SDLK_4: renderer->render_mode = GTR::eRenderMode::SINGLE_PATH; break;
 	}
 }
 

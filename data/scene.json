@@ -39,6 +39,7 @@
 		{
 			"name": "lamp",
 			"type": "LIGHT",
+			"color": [ 1.0, 0.0, 0.0 ],
 			"position": [ 0, 200, 0 ],
 			"target": [ 0, 0, 0.1 ]
 		}

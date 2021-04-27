@@ -9,6 +9,7 @@ GTR::Scene* GTR::Scene::instance = NULL;
 GTR::Scene::Scene()
 {
 	instance = this;
+	//this->max_lights = 3;
 }
 
 void GTR::Scene::clear()
@@ -104,6 +105,18 @@ bool GTR::Scene::load(const char* filename)
 		}
 
 		ent->configure(entity_json);
+		if (ent->entity_type == LIGHT) {
+
+			LightEntity* lent = (GTR::LightEntity*)ent;
+			if (this->light_entities.size() < this->max_lights) {
+				this->light_entities.push_back(lent);
+			}
+			else {
+				printf("Too much lights in the scene, the max is: %d ", this->max_lights);
+
+			}
+		}
+
 	}
 
 	//free memory
@@ -132,7 +145,6 @@ void GTR::BaseEntity::renderInMenu()
 	ImGuiMatrix44(model, "Model");
 #endif
 }
-
 
 
 
@@ -166,10 +178,16 @@ void GTR::PrefabEntity::renderInMenu()
 }
 
 
-
 GTR::LightEntity::LightEntity()
 {
 	entity_type = LIGHT;
+	color = Vector3(1.0,1.0,1.0);
+	intensity = 1.0;
+	light_type = POINT;
+
+	max_distance = 50;
+	cone_angle = 20;
+	area_size = 50;
 }
 
 void GTR::LightEntity::configure(cJSON* json)		//Modificar per altres entitats
@@ -180,11 +198,15 @@ void GTR::LightEntity::configure(cJSON* json)		//Modificar per altres entitats
 	}
 	if (cJSON_GetObjectItem(json, "cone_angle"))
 	{
-		this->cone_angle = cJSON_GetObjectItem(json, "distance")->valuedouble;
+		this->cone_angle = cJSON_GetObjectItem(json, "cone_angle")->valuedouble;
 	}
 	if (cJSON_GetObjectItem(json, "area_size"))
 	{
-		this->area_size = cJSON_GetObjectItem(json, "distance")->valuedouble;
+		this->area_size = cJSON_GetObjectItem(json, "area_size")->valuedouble;
+	}
+	if (cJSON_GetObjectItem(json, "color"))
+	{
+		this->color = readJSONVector3(json, "color", Vector3(1, 1, 1));
 	}
 }
 

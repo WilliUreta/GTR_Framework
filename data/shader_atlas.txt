@@ -5,6 +5,9 @@ depth quad.vs depth.fs
 multi basic.vs multi.fs
 light_singlepass basic.vs light_singlepass.fs
 
+uvs basic.vs uvs.fs
+normal basic.vs normal.fs
+
 \basic.vs
 
 #version 330 core
@@ -147,27 +150,89 @@ in vec3 v_normal;
 in vec2 v_uv;
 
 uniform vec4 u_color;
+uniform vec3 u_emissive_factor;
+
 uniform sampler2D u_texture;
+uniform sampler2D u_metallic_roughness_texture;
+uniform sampler2D u_emissive_texture;
+
 uniform float u_time;
 uniform float u_alpha_cutoff;
 
-layout(location = 0) out vec4 FragColor;
-layout(location = 1) out vec4 NormalColor;
+uniform vec3 u_ambient_light;
+
+uniform vec3 u_light_color;
+uniform float u_light_type;
+uniform vec3 u_light_vector;
+uniform vec3 u_light_position;
+
+//layout(location = 0) 
+out vec4 FragColor;
 
 void main()
 {
-	vec2 uv = v_uv;
 	vec4 color = u_color;
-	color *= texture( u_texture, uv );
+	color *= texture( u_texture, v_uv );
 
 	if(color.a < u_alpha_cutoff)
 		discard;
 
+	vec3 light = vec3(0.0);
+
+	//Phong
 	vec3 N = normalize(v_normal);
+	vec3 L;
+
+	if(u_light_type ==2){	//directional light
+		L = u_light_vector;
+	}
+	else{					// Point and spot light
+		L = normalize(u_light_position-v_world_position);
+		//light distance???	
+	}
+
+	float NdotL = clamp( dot(N,L), 0.0,1.0);
+
+	light += NdotL * u_light_color;
+
+	//occlusion
+	light = u_ambient_light * texture(u_metallic_roughness_texture,v_uv).x;
+
+	color.xyz *= light;
+
+	//Emissive
+	color.xyz += u_emissive_factor * texture(u_emissive_texture,v_uv).xyz;
 
 	FragColor = color;
-	NormalColor = vec4(N,1.0);
 }
+
+\normal.fs
+
+#version 330 core
+
+in vec3 v_normal;
+
+out vec4 FragColor;
+void main()
+{
+
+	FragColor = vec4(abs(normalize(v_normal)),1.0);
+}
+
+\uvs.fs
+
+#version 330 core
+
+in vec2 v_uv;
+
+out vec4 FragColor;
+
+void main()
+{
+	
+	FragColor = vec4( v_uv,1.0,1.0);
+}
+
 
 \depth.fs
 

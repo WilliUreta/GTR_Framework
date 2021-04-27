@@ -11,8 +11,6 @@ class cJSON;
 //our namespace
 namespace GTR {
 
-
-
 	enum eEntityType {
 		NONE = 0,
 		PREFAB = 1,
@@ -84,11 +82,13 @@ namespace GTR {
 
 		Vector3 background_color;
 		Vector3 ambient_light;
+		int max_lights = 3;
 
 		Scene();
 
 		std::string filename;
 		std::vector<BaseEntity*> entities;
+		std::vector<LightEntity*> light_entities;
 
 		void clear();
 		void addEntity(BaseEntity* entity);

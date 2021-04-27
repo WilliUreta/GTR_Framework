@@ -1,17 +1,28 @@
 #pragma once
 #include "prefab.h"
 
+#include "framework.h"
 #include "rendercall.h"
+#include <algorithm>	
 
 //forward declarations
 class Camera;
 
 namespace GTR {
 
+
+	enum eRenderMode { 
+		SINGLE_PATH, 
+		MULTI_PATH, 
+		NORMALS,
+		TEXTURE,
+		UVS 
+	}; //types of cameras available
+
 	class Prefab;
 	class Material;
+	class RenderCall;
 	
-	enum eRenderMode { SINGLE_PATH, MULTI_PATH }; //types of cameras available
 	// This class is in charge of rendering anything in our system.
 	// Separating the render from anything else makes the code cleaner
 	class Renderer
@@ -19,7 +30,11 @@ namespace GTR {
 
 	public:
 
-		eRenderMode renderMode;
+		eRenderMode render_mode;
+		std::vector<GTR::RenderCall> renderCall_vector;
+
+		Renderer();
+
 		//add here your functions
 		//...
 
@@ -34,6 +49,8 @@ namespace GTR {
 
 		//to render one mesh given its material and transformation matrix
 		void renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera);
+	
+		void renderRenderCall(Camera* camera);
 	};
 
 
