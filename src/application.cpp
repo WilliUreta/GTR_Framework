@@ -279,6 +279,18 @@ void Application::renderDebugGUI(void)
 		if (ImGui::IsItemClicked(0))
 			selected_entity = entity;
 	}
+	
+	/*for (int i = 0; i < scene->light_entities.size(); i++) {
+
+		GTR::LightEntity* lentity = scene->light_entities[i];
+
+		if (ImGui::TreeNode(lentity, lentity->name.c_str()))
+		{
+			lentity->renderInMenu();
+			ImGui::TreePop();
+		}
+
+	}*/
 
 	ImGui::PopStyleColor();
 #endif

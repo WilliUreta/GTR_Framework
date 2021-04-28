@@ -66,6 +66,7 @@ namespace GTR {
 		float max_distance;
 		float cone_angle;
 		float area_size;
+		float spot_exponent;
 	
 		LightEntity();
 		virtual void renderInMenu();

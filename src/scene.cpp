@@ -183,7 +183,7 @@ GTR::LightEntity::LightEntity()
 	entity_type = LIGHT;
 	color = Vector3(1.0,1.0,1.0);
 	intensity = 1.0;
-	light_type = POINT;
+	light_type = SPOT;
 
 	max_distance = 50;
 	cone_angle = 20;
@@ -208,18 +208,33 @@ void GTR::LightEntity::configure(cJSON* json)		//Modificar per altres entitats
 	{
 		this->color = readJSONVector3(json, "color", Vector3(1, 1, 1));
 	}
+	if (cJSON_GetObjectItem(json, "light_type"))
+	{
+		std::string str = cJSON_GetObjectItem(json, "light_type")->valuestring;
+		if (str == "POINT")
+			this->light_type = eLightType(0);
+		if (str == "SPOT")
+			this->light_type = eLightType(1);
+		if (str == "DIRECTIONAL")
+			this->light_type = eLightType(2);
+		
+	}
+	if (cJSON_GetObjectItem(json, "direction"))
+	{
+//		this->model.lookAt(this->model.getTranslation(), readJSONVector3(json, "direction",Vector3(0,0,0)), Vector3(0.0, 1.0, 0.0));
+	}
+	if (cJSON_GetObjectItem(json, "spot_exponent"))
+	{
+		this->spot_exponent = cJSON_GetObjectItem(json, "spot_exponent")->valuedouble;
+	}
 }
 
 void GTR::LightEntity::renderInMenu()
 {
-	BaseEntity::renderInMenu();
+	//BaseEntity::renderInMenu();
 
 #ifndef SKIP_IMGUI
-	/*ImGui::Text("filename: %s", filename.c_str()); // Edit 3 floats representing a color
-	if (prefab && ImGui::TreeNode(prefab, "Prefab Info"))
-	{
-		prefab->root.renderInMenu();
-		ImGui::TreePop();
-	}*/
+	
+	ImGui::ColorEdit4("BG color", this->color.v);
 #endif
 }

@@ -1,6 +1,6 @@
 {
 	"background_color":[0.3,0.3,0.3],
-	"ambient_light":[1,1,1],
+	"ambient_light":[0.5,0.5,0.5],
 	"entities": [
 		{
 			"name": "floor",
@@ -39,6 +39,9 @@
 		{
 			"name": "lamp",
 			"type": "LIGHT",
+			"light_type": "SPOT",
+			"spot_exponent": 10,
+			"direction": [ -80, 0, -100 ],
 			"color": [ 1.0, 0.0, 0.0 ],
 			"position": [ 0, 200, 0 ],
 			"target": [ 0, 0, 0.1 ]

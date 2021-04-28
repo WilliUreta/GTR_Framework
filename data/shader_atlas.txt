@@ -162,9 +162,15 @@ uniform float u_alpha_cutoff;
 uniform vec3 u_ambient_light;
 
 uniform vec3 u_light_color;
+uniform float u_light_intensity;
+uniform float u_light_max_distance;
+uniform float u_light_cone_angle;
+uniform float u_light_exponent;
+
 uniform float u_light_type;
 uniform vec3 u_light_vector;
 uniform vec3 u_light_position;
+uniform vec3 u_light_direction; //light_direction i light vector son el mateix???
 
 //layout(location = 0) 
 out vec4 FragColor;
@@ -187,16 +193,39 @@ void main()
 		L = u_light_vector;
 	}
 	else{					// Point and spot light
-		L = normalize(u_light_position-v_world_position);
-		//light distance???	
+		L = u_light_position-v_world_position;
+		
+		//u_light_distance
+		L = normalize(L);
+	}
+
+	//SpotLight
+	float spot_factor = 1.0;
+	if(u_light_type ==1){	//directional light
+		
+		vec3 D = normalize(u_light_direction);
+		float spot_cosine = dot(D,-L);
+
+		//Comprovar cos(u_light_cone_angle)
+		if(spot_cosine >= cos(u_light_cone_angle)){	//inside the spot
+			spot_factor = pow(spot_cosine,u_light_exponent);
+		}
+		else{	//Outside spot
+			//return vec3(0.0);	//?????
+		}
 	}
 
 	float NdotL = clamp( dot(N,L), 0.0,1.0);
 
-	light += NdotL * u_light_color;
+
+	//attenuation
+	//float attenuation
+
+	light += NdotL * u_light_color * u_light_intensity * spot_factor;
+
 
 	//occlusion
-	light = u_ambient_light * texture(u_metallic_roughness_texture,v_uv).x;
+	light += u_ambient_light * texture(u_metallic_roughness_texture,v_uv).x;
 
 	color.xyz *= light;
 
