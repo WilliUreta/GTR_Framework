@@ -167,8 +167,7 @@ uniform float u_light_max_distance;
 uniform float u_light_cone_angle;
 uniform float u_light_exponent;
 
-uniform float u_light_type;
-uniform vec3 u_light_vector;
+uniform int u_light_type;
 uniform vec3 u_light_position;
 uniform vec3 u_light_direction; //light_direction i light vector son el mateix???
 
@@ -189,8 +188,8 @@ void main()
 	vec3 N = normalize(v_normal);
 	vec3 L;
 
-	if(u_light_type ==2){	//directional light
-		L = u_light_vector;
+	if(u_light_type == 2){	//directional light
+		L = u_light_direction;
 	}
 	else{					// Point and spot light
 		L = u_light_position-v_world_position;
@@ -201,17 +200,19 @@ void main()
 
 	//SpotLight
 	float spot_factor = 1.0;
-	if(u_light_type ==1){	//directional light
+
+	if(u_light_type == 1){	//Spot light
 		
 		vec3 D = normalize(u_light_direction);
 		float spot_cosine = dot(D,-L);
 
 		//Comprovar cos(u_light_cone_angle)
-		if(spot_cosine >= cos(u_light_cone_angle)){	//inside the spot
+
+		if(spot_cosine >= cos(radians(u_light_cone_angle))){	//inside the spot
 			spot_factor = pow(spot_cosine,u_light_exponent);
 		}
 		else{	//Outside spot
-			//return vec3(0.0);	//?????
+			spot_factor = 0.0;	//?????
 		}
 	}
 
@@ -219,10 +220,10 @@ void main()
 
 
 	//attenuation
-	//float attenuation
+	//float light_distance 
 
-	light += NdotL * u_light_color * u_light_intensity * spot_factor;
-
+	light += (NdotL * u_light_color * u_light_intensity * spot_factor);
+	
 
 	//occlusion
 	light += u_ambient_light * texture(u_metallic_roughness_texture,v_uv).x;

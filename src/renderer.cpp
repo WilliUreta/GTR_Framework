@@ -119,7 +119,6 @@ void GTR::Renderer::renderRenderCall(Camera* camera)
 
 	for (int i = 0; i < this->renderCall_vector.size(); ++i) {			//Render directe del vector de renderCalls, "ordenat"
 		//Podre accedir a scene->ambient_light?
-
 		this->renderMeshWithMaterial(this->renderCall_vector[i].node_model, this->renderCall_vector[i].node->mesh, this->renderCall_vector[i].node->material, camera);
 	}
 
@@ -219,18 +218,17 @@ void Renderer::renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Mat
 		for (int i = 0; i < scene->light_entities.size(); ++i) {			//Render directe del vector de renderCalls, "ordenat"
 				if (scene->light_entities[i]->entity_type == LIGHT) {
 					
-					//shader->setUniform("u_light_color", scene->light_entities[i]->color);
 					shader->setUniform("u_light_color", scene->light_entities[i]->color);
 					shader->setUniform("u_light_intensity", scene->light_entities[i]->intensity);
 					shader->setUniform("u_light_max_distance", scene->light_entities[i]->max_distance);
-					//shader->setUniform("u_light_cone_angle", scene->light_entities[i]->cone_angle);
-					shader->setUniform("u_light_cone_angle", 20);
+					shader->setUniform("u_light_cone_angle", scene->light_entities[i]->cone_angle);
+					//shader->setUniform("u_light_cone_angle", 20);
 					shader->setUniform("u_light_exponent", scene->light_entities[i]->spot_exponent);
 					
 					shader->setUniform("u_light_type", scene->light_entities[i]->light_type);
-					shader->setUniform("u_light_vector", Vector3(0.0,1.0,0.0));	//arbitrari
 					shader->setUniform("u_light_position", scene->light_entities[i]->model.getTranslation());
-					shader->setUniform("u_light_direction", Vector3(0.0,1.0,0.0));	//arbitrari
+					//shader->setUniform("u_light_direction", scene->light_entities[i]->temporal_dir);	//arbitrari
+					shader->setUniform("u_light_direction", scene->light_entities[i]->model.frontVector());	//arbitrari
 					//shader->setUniform("u_light_direction", scene->light_entities[i]->model.frontVector());
 				}
 		}

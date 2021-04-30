@@ -37,9 +37,11 @@ namespace GTR {
 
 		struct orderer_alpha {		//https://stackoverflow.com/questions/1380463/sorting-a-vector-of-custom-objects
 
-			inline bool operator() (RenderCall& rc_a, RenderCall& rc_b) {
+			inline bool operator() (RenderCall& rc_a, RenderCall& rc_b) {	//rc_a.node->material->alpha_mode == Opaque ...
 
-				return(rc_a.node->material->alpha_mode <= rc_b.node->material->alpha_mode);		//Blend = 2, Mask 1, no alpha =0, volem  primer els 2.
+				return((((rc_a.node->material->alpha_mode == GTR::eAlphaMode::NO_ALPHA) && (rc_b.node->material->alpha_mode == GTR::eAlphaMode::NO_ALPHA)) || ((rc_a.node->material->alpha_mode == GTR::eAlphaMode::BLEND) && (rc_b.node->material->alpha_mode == GTR::eAlphaMode::BLEND))));		//Blend = 2, Mask 1, no alpha =0, volem  primer els 2.
+				
+			
 			}
 		};
 

@@ -67,7 +67,9 @@ namespace GTR {
 		float cone_angle;
 		float area_size;
 		float spot_exponent;
-	
+
+		Vector3 temporal_dir;
+
 		LightEntity();
 		virtual void renderInMenu();
 		virtual void configure(cJSON* json);
