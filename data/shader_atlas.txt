@@ -298,54 +298,48 @@ void main()
 
 	//Phong
 	vec3 N = normalize(v_normal);
-	for( int i=0; i< MAX_LIGHTS; i++){
 			
-		if(i< u_num_lights){
-			
-			vec3 L;
+	vec3 L;
 
-			if(u_light_type == 2){	//directional light
-				L = u_light_direction;
-			}
-			else{					// Point and spot light
-				L = u_light_position-v_world_position;
+	if(u_light_type == 2){	//directional light
+		L = u_light_direction;
+	}
+	else{					// Point and spot light
+		L = u_light_position-v_world_position;
 		
-				//u_light_distance
-				L = normalize(L);
-			}
+		L = normalize(L);
+	}
 
-			//SpotLight
-			float spot_factor = 1.0;
+	//SpotLight
+	float spot_factor = 1.0;
 
-			if(u_light_type == 1){	//Spot light
+	if(u_light_type == 1){	//Spot light
 		
-				vec3 D = normalize(u_light_direction);
-				float spot_cosine = dot(D,-L);
+		vec3 D = normalize(u_light_direction);
+		float spot_cosine = dot(D,-L);
 
-				//Comprovar cos(u_light_cone_angle)
+		//Comprovar cos(u_light_cone_angle)
 
-				if(spot_cosine >= cos(radians(u_light_cone_angle))){	//inside the spot
-					spot_factor = pow(spot_cosine,u_light_exponent);
-				}
-				else{	//Outside spot
-					spot_factor = 0.0;	//?????
-				}
-			}
-
-			float NdotL = clamp( dot(N,L), 0.0,1.0);
-
-
-			//attenuation
-			float light_distance = length(u_light_position - v_world_position);	//Compute dist
-			float att_factor = u_light_max_distance - light_distance;			//Compute linear att factor
-			att_factor /= u_light_max_distance;		//Normalize
-			att_factor = max(att_factor,0.0);		//No negative values
-
-			//Final
-			light += (NdotL * u_light_color * u_light_intensity * spot_factor * att_factor);
+		if(spot_cosine >= cos(radians(u_light_cone_angle))){	//inside the spot
+			spot_factor = pow(spot_cosine,u_light_exponent);
+		}
+		else{	//Outside spot
+			spot_factor = 0.0;	//?????
 		}
 	}
 
+	float NdotL = clamp( dot(N,L), 0.0,1.0);
+
+	//attenuation
+	//float att_factor = (1.0);
+	float light_distance = length(u_light_position - v_world_position);	//Compute dist
+	float att_factor = u_light_max_distance - light_distance;			//Compute linear att factor
+	att_factor /= u_light_max_distance;		//Normalize
+	att_factor = max(att_factor,0.0);		//No negative values
+		
+	//Final
+	light += (NdotL * u_light_color * u_light_intensity * spot_factor * att_factor);
+		
 	//occlusion
 	light += u_ambient_light * texture(u_metallic_roughness_texture,v_uv).x;
 

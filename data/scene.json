@@ -37,7 +37,7 @@
 			"scale": [ 0.4, 0.4, 0.4 ]
 		},
 		{
-			"name": "lamp",
+			"name": "lamp1",
 			"type": "LIGHT",
 			"light_type": "SPOT",
 			"spot_exponent": 10,
@@ -47,7 +47,7 @@
 			"target": [ 0, 0, 0.1 ]
 		},
 		{
-			"name": "lamp",
+			"name": "lamp2",
 			"type": "LIGHT",
 			"light_type": "POINT",
 			"spot_exponent": 10,

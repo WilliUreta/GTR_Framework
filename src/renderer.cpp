@@ -216,10 +216,10 @@ void Renderer::renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Mat
 		shader->setUniform("u_texture", texture, 0);
 	if (metallic_roughness_texture)
 		shader->setUniform("u_metallic_roughness_texture", metallic_roughness_texture, 1);
-	if (metallic_roughness_texture)
-		shader->setUniform("u_metallic_roughness_texture", metallic_roughness_texture, 1);
+	if (normal_texture)
+		shader->setUniform("u_normalmap_texture", normal_texture, 2);
 	if (emissive_texture)
-		shader->setUniform("u_emissive_texture", emissive_texture, 2);
+		shader->setUniform("u_emissive_texture", emissive_texture, 3);
 
 	
 	shader->setUniform("u_ambient_light", scene->ambient_light);
@@ -235,13 +235,11 @@ void Renderer::renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Mat
 
 			if (i == 0) {
 				glDisable(GL_BLEND);
-
 			}
 			else {
 				glEnable(GL_BLEND);
 				shader->setUniform("u_ambient_light", Vector3(0.0,0.0,0.0));
-				shader->setUniform("u_emissive_texture", Texture::getBlackTexture(), 2);
-			
+				shader->setUniform("u_emissive_texture", Texture::getBlackTexture(), 3);
 			}
 
 			shader->setUniform("u_light_color", scene->light_entities[i]->color);
@@ -262,11 +260,12 @@ void Renderer::renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Mat
 			//this is used to say which is the alpha threshold to what we should not paint a pixel on the screen (to cut polygons according to texture alpha)
 			shader->setUniform("u_alpha_cutoff", material->alpha_mode == GTR::eAlphaMode::MASK ? material->alpha_cutoff : 0);
 						
-			if (material->alpha_mode == BLEND) {			//If it has alpha, only once
+			if (!material->alpha_mode == NO_ALPHA) {			//If it doesn't have alpha, only once
 				
 				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				mesh->render(GL_TRIANGLES);
-				continue;
+				goto cont;
 
 			}
 
@@ -274,8 +273,8 @@ void Renderer::renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Mat
 			mesh->render(GL_TRIANGLES);
 
 		}
-				
-		glDepthFunc(GL_LESS);	//Standard
+		cont:	//https://stackoverflow.com/questions/41179629/how-to-use-something-like-a-continue-statement-in-nested-for-loops
+		glDepthFunc(GL_LESS);	//Default
 
 	}
 	else if(scene->light_entities.size() > 0 && this->render_mode == eRenderMode::SINGLE_PATH) {
