@@ -31,7 +31,7 @@ namespace GTR {
 
 			inline bool operator() (RenderCall& rc_a, RenderCall& rc_b) {
 				
-				return(rc_a.distance < rc_b.distance);		//Si esta mes lluny, primer
+				return(rc_a.distance > rc_b.distance);		//Si esta mes lluny, primer
 			}
 		};
 

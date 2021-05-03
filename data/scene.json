@@ -45,6 +45,16 @@
 			"color": [ 1.0, 0.0, 0.0 ],
 			"position": [ 0, 200, 0 ],
 			"target": [ 0, 0, 0.1 ]
+		},
+		{
+			"name": "lamp",
+			"type": "LIGHT",
+			"light_type": "POINT",
+			"spot_exponent": 10,
+			"direction": [ -80, 0, -100 ],
+			"color": [ 0.0, 1.0, 0.0 ],
+			"position": [ -100, 200, 0 ],
+			"target": [ 0, 0, 0.1 ]
 		}
 	]
 }

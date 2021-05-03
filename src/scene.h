@@ -85,7 +85,7 @@ namespace GTR {
 
 		Vector3 background_color;
 		Vector3 ambient_light;
-		int max_lights = 3;
+		const static int max_lights = 5;
 
 		Scene();
 

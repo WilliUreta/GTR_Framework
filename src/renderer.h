@@ -32,6 +32,7 @@ namespace GTR {
 
 		eRenderMode render_mode;
 		std::vector<GTR::RenderCall> renderCall_vector;
+		std::vector<GTR::RenderCall> renderCall_blend_vector;
 
 		Renderer();
 

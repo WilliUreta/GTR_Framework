@@ -22,6 +22,7 @@ GTR::Scene* scene = nullptr;
 GTR::Prefab* prefab = nullptr;
 GTR::Renderer* renderer = nullptr;
 GTR::RenderCall* renderCall = nullptr;
+GTR::RenderCall* renderCall_blend = nullptr;
 GTR::BaseEntity* selected_entity = nullptr;
 FBO* fbo = nullptr;
 Texture* texture = nullptr;
@@ -75,6 +76,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 	//NOU!!
 	renderCall = new GTR::RenderCall();
+	renderCall_blend = new GTR::RenderCall();
 
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse
