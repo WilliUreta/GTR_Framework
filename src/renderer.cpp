@@ -231,43 +231,48 @@ void Renderer::renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Mat
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 		for (int i = 0; i < scene->light_entities.size(); ++i) {			//Render directe del vector de renderCalls, "ordenat"
-			//if (scene->light_entities[i]->entity_type == LIGHT) {
-
-			if (i == 0) {
+			
+			if (i == 0 && !(material->alpha_mode == BLEND)) {
 				glDisable(GL_BLEND);
 			}
 			else {
 				glEnable(GL_BLEND);
 				shader->setUniform("u_ambient_light", Vector3(0.0,0.0,0.0));
-				shader->setUniform("u_emissive_texture", Texture::getBlackTexture(), 3);
+				shader->setUniform("u_emissive_factor", Vector3(0.0, 0.0, 0.0));
+
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 			}
+
+			if (material->alpha_mode == BLEND) {
+
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				
+			}
+			
 
 			shader->setUniform("u_light_color", scene->light_entities[i]->color);
 			shader->setUniform("u_light_intensity", scene->light_entities[i]->intensity);
 			shader->setUniform("u_light_max_distance", scene->light_entities[i]->max_distance);
 			shader->setUniform("u_light_cone_angle", scene->light_entities[i]->cone_angle);
-			//shader->setUniform("u_light_cone_angle", 20);
 			shader->setUniform("u_light_exponent", scene->light_entities[i]->spot_exponent);
 					
 			shader->setUniform("u_light_type", scene->light_entities[i]->light_type);
 			shader->setUniform("u_light_position", scene->light_entities[i]->model.getTranslation());
-			//shader->setUniform("u_light_direction", scene->light_entities[i]->temporal_dir);	//arbitrari
-			shader->setUniform("u_light_direction", scene->light_entities[i]->model.frontVector());	//arbitrari
-			//shader->setUniform("u_light_direction", scene->light_entities[i]->model.frontVector());
+			shader->setUniform("u_light_direction", scene->light_entities[i]->model.frontVector());		
 			
-			//}
-
 			//this is used to say which is the alpha threshold to what we should not paint a pixel on the screen (to cut polygons according to texture alpha)
 			shader->setUniform("u_alpha_cutoff", material->alpha_mode == GTR::eAlphaMode::MASK ? material->alpha_cutoff : 0);
 						
-			if (!material->alpha_mode == NO_ALPHA) {			//If it doesn't have alpha, only once
+			/*if (material->alpha_mode == BLEND) {			
 				
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				mesh->render(GL_TRIANGLES);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 				goto cont;
 
-			}
+			}*/
 
 			//do the draw call that renders the mesh into the screen
 			mesh->render(GL_TRIANGLES);
@@ -275,7 +280,7 @@ void Renderer::renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Mat
 		}
 		cont:	//https://stackoverflow.com/questions/41179629/how-to-use-something-like-a-continue-statement-in-nested-for-loops
 		glDepthFunc(GL_LESS);	//Default
-
+		glDisable(GL_BLEND);
 	}
 	else if(scene->light_entities.size() > 0 && this->render_mode == eRenderMode::SINGLE_PATH) {
 
@@ -304,20 +309,21 @@ void Renderer::renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Mat
 			}
 		}
 		
-		
-		shader->setUniform3Array("u_light_color", (float*)&light_color, 3);
-		shader->setUniform1Array("u_light_intensity", (float*)&light_intensity, 1);
-		shader->setUniform1Array("u_light_max_distance", (float*)&light_max_dist, 1);
-		shader->setUniform1Array("u_light_cone_angle", (float*)&light_cone_angle, 1);
+		int light_size = scene->light_entities.size();
+
+		shader->setUniform3Array("u_light_color", (float*)light_color, light_size);
+		shader->setUniform1Array("u_light_intensity", (float*)light_intensity, light_size);
+		shader->setUniform1Array("u_light_max_distance", (float*)light_max_dist, light_size);
+		shader->setUniform1Array("u_light_cone_angle", (float*)light_cone_angle, light_size);
 	
-		shader->setUniform1Array("u_light_exponent", (float*)&light_exponent, 1);
-		shader->setUniform1("u_light_type", light_type);
-		shader->setUniform3Array("u_light_position", (float*)&light_position,3);
+		shader->setUniform1Array("u_light_exponent", (float*)light_exponent, light_size);
+		shader->setUniform1Array("u_light_type", light_type, light_size);
+		shader->setUniform3Array("u_light_position", (float*)light_position, light_size);
 		//shader->setUniform("u_light_direction", scene->light_entities[i]->temporal_dir);	//arbitrari
-		shader->setUniform3Array("u_light_direction", (float*)&light_direction,3);
+		shader->setUniform3Array("u_light_direction", (float*)light_direction, light_size);
 		//shader->setUniform("u_light_direction", scene->light_entities[i]->model.frontVector());
 
-		shader->setUniform("u_num_lights", (int*)scene->light_entities.size());
+		shader->setUniform("u_num_lights", (int)scene->light_entities.size());
 	
 	
 	
@@ -327,9 +333,15 @@ void Renderer::renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Mat
 		//do the draw call that renders the mesh into the screen
 		mesh->render(GL_TRIANGLES);
 
-		//disable shader
-		shader->disable();
-		
+	
+	}
+	else {
+		//this is used to say which is the alpha threshold to what we should not paint a pixel on the screen (to cut polygons according to texture alpha)
+		shader->setUniform("u_alpha_cutoff", material->alpha_mode == GTR::eAlphaMode::MASK ? material->alpha_cutoff : 0);
+
+		//do the draw call that renders the mesh into the screen
+		mesh->render(GL_TRIANGLES);
+
 	}
 	
 	//disable shader

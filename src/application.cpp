@@ -312,6 +312,7 @@ void Application::onKeyDown( SDL_KeyboardEvent event )
 		case SDLK_2: renderer->render_mode = GTR::eRenderMode::TEXTURE; break;
 		case SDLK_3: renderer->render_mode = GTR::eRenderMode::UVS; break;
 		case SDLK_4: renderer->render_mode = GTR::eRenderMode::SINGLE_PATH; break;
+		case SDLK_6: renderer->render_mode = GTR::eRenderMode::MULTI_PATH; break;
 	}
 }
 
