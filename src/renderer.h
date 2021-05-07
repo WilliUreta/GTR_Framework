@@ -3,6 +3,8 @@
 
 #include "framework.h"
 #include "rendercall.h"
+#include "fbo.h"
+#include "application.h"
 #include <algorithm>	
 
 //forward declarations
@@ -31,6 +33,7 @@ namespace GTR {
 	public:
 
 		eRenderMode render_mode;
+		bool use_shadowmap;
 		std::vector<GTR::RenderCall> renderCall_vector;
 		std::vector<GTR::RenderCall> renderCall_blend_vector;
 
@@ -48,10 +51,20 @@ namespace GTR {
 		//to render one node from the prefab and its children
 		void renderNode(const Matrix44& model, GTR::Node* node, Camera* camera);
 
+		void orderRenderCalls();
+
 		//to render one mesh given its material and transformation matrix
 		void renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera);
+		void renderMeshWithMaterialSingle(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera);
+		void renderMeshWithMaterialMulti(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera);
 	
 		void renderRenderCall(Camera* camera);
+
+		void generateShadowMaps(GTR::Scene* scene);
+
+		void renderShadowMap(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera);
+
+		void showShadowMap(GTR::LightEntity* light);
 	};
 
 

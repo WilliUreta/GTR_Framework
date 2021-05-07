@@ -23,14 +23,14 @@
 			"angle": -45
 		},
 		{
-			"name": "house",
+			"name": "house1",
 			"type": "PREFAB",
 			"filename": "prefabs/house_test/scene.gltf",
 			"position": [ 300, 0, 200 ],
 			"scale": [ 0.4, 0.4, 0.4 ]
 		},
 		{
-			"name": "house",
+			"name": "house2",
 			"type": "PREFAB",
 			"filename": "prefabs/house_test/scene.gltf",
 			"position": [ 300, 0, -200 ],
@@ -41,20 +41,20 @@
 			"type": "LIGHT",
 			"light_type": "SPOT",
 			"spot_exponent": 10,
-			"direction": [ -80, 0, -100 ],
+			"direction": [ 0.0, -1.0, -0.5 ],
 			"color": [ 1.0, 0.0, 0.0 ],
 			"position": [ 0, 200, 0 ],
-			"target": [ 0, 0, 0.1 ]
+			"intensity": 1.6 
 		},
 		{
 			"name": "lamp2",
 			"type": "LIGHT",
-			"light_type": "POINT",
+			"light_type": "SPOT",
 			"spot_exponent": 10,
-			"direction": [ -80, 0, -100 ],
+			"direction": [ 0.0, -1.0, -0.5 ],
 			"color": [ 0.0, 1.0, 0.0 ],
-			"position": [ -100, 200, 0 ],
-			"target": [ 0, 0, 0.1 ]
+			"position": [ -210, 315, 130 ],
+			"intensity": 1.0
 		}
 	]
 }

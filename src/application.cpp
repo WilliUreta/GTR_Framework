@@ -78,6 +78,11 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	renderCall = new GTR::RenderCall();
 	renderCall_blend = new GTR::RenderCall();
 
+	//FBO per shadowmaps
+	/*texture = new Texture();
+	fbo = new FBO();
+	fbo->setTexture(texture);
+	*/
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse
 }
@@ -104,16 +109,26 @@ void Application::render(void)
 	//lets render something
 	//Matrix44 model;
 	//renderer->renderPrefab( model, prefab, camera );
-
-	//renderCall->renderScene(scene, camera, renderer);
-
+	
+	//
+	//*camera = *scene->light_entities[0]->light_camera;
+	camera->enable();
+	
 	renderer->renderScene(scene, camera);
-	renderer->renderRenderCall(camera);
+	renderer->orderRenderCalls();
+	
+	//renderer->generateShadowMaps(scene);		//save no, generate etc...
+	//renderer->showShadowMap(scene->light_entities[0]);
+	
+	//camera->enable();
+	renderer->renderRenderCall(camera);		//Main renderer
 
+		
+	//texture->toViewport();
 	//Draw the floor grid, helpful to have a reference point
-	if(render_debug)
+	/*if(render_debug)
 		drawGrid();
-
+	*/
     glDisable(GL_DEPTH_TEST);
     //render anything in the gui after this
 
@@ -252,6 +267,7 @@ void Application::renderDebugGUI(void)
 	ImGui::Checkbox("Wireframe", &render_wireframe);
 	ImGui::ColorEdit3("BG color", scene->background_color.v);
 	ImGui::ColorEdit3("Ambient Light", scene->ambient_light.v);
+	ImGui::Checkbox("Use ShadowMaps", &renderer->use_shadowmap);
 
 	//add info to the debug panel about the camera
 	if (ImGui::TreeNode(camera, "Camera")) {
@@ -307,12 +323,13 @@ void Application::onKeyDown( SDL_KeyboardEvent event )
 		case SDLK_F1: render_debug = !render_debug; break;
 		case SDLK_f: camera->center.set(0, 0, 0); camera->updateViewMatrix(); break;
 		case SDLK_F4: Shader::ReloadAll(); break;		//No em va el F5...
-		case SDLK_F6: scene->clear(); scene->load(scene->filename.c_str()); break;
+		case SDLK_F6: scene->clear(); scene->load(scene->filename.c_str()); selected_entity = NULL;  break;
 		case SDLK_1: renderer->render_mode = GTR::eRenderMode::NORMALS; break;
 		case SDLK_2: renderer->render_mode = GTR::eRenderMode::TEXTURE; break;
 		case SDLK_3: renderer->render_mode = GTR::eRenderMode::UVS; break;
 		case SDLK_4: renderer->render_mode = GTR::eRenderMode::SINGLE_PATH; break;
 		case SDLK_6: renderer->render_mode = GTR::eRenderMode::MULTI_PATH; break;
+		case SDLK_7: renderer->use_shadowmap = !renderer->use_shadowmap; break;
 	}
 }
 

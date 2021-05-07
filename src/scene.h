@@ -2,6 +2,8 @@
 #define SCENE_H
 
 #include "framework.h"
+#include "fbo.h"
+#include "application.h"
 #include <string>
 
 //forward declaration
@@ -70,6 +72,11 @@ namespace GTR {
 
 		Vector3 temporal_dir;
 
+		Matrix44 viewprojection_matrix;
+		Camera* light_camera;
+		FBO* fbo;
+		float bias;
+		
 		LightEntity();
 		virtual void renderInMenu();
 		virtual void configure(cJSON* json);

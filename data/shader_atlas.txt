@@ -3,8 +3,10 @@ flat basic.vs flat.fs
 texture basic.vs texture.fs
 depth quad.vs depth.fs
 multi basic.vs multi.fs
+
 light_singlepass basic.vs light_singlepass.fs
 light_multipass basic.vs light_multipass.fs
+shadowmap basic.vs shadowmap.fs
 
 uvs basic.vs uvs.fs
 normal basic.vs normal.fs
@@ -190,6 +192,7 @@ uniform sampler2D u_texture;
 uniform sampler2D u_metallic_roughness_texture;
 uniform sampler2D u_emissive_texture;
 uniform sampler2D u_normalmap_texture;
+uniform int u_normalmap_flag;
 
 uniform float u_time;
 uniform float u_alpha_cutoff;
@@ -215,6 +218,9 @@ out vec4 FragColor;
 
 #include "compute_normalmap"
 
+layout(location = 0) out vec4 fragColor;
+layout(location = 1) out vec4 fragColor2;
+
 void main()
 {
 	vec4 color = u_color;
@@ -227,8 +233,11 @@ void main()
 
 	//Phong
 	vec3 N = normalize(v_normal);
-	//vec3 normal_pixel = texture2D(u_normalmap_texture,v_uv).xyz;
-	//N = perturbNormal(N, v_world_position, v_uv, normal_pixel);
+	if(u_normalmap_flag ==1){
+		
+		vec3 normal_pixel = texture2D(u_normalmap_texture,v_uv).xyz;
+		N = perturbNormal(N, v_world_position, v_uv, normal_pixel);
+	}
 
 	for( int i=0; i< MAX_LIGHTS; i++){
 			
@@ -308,6 +317,7 @@ uniform sampler2D u_texture;
 uniform sampler2D u_metallic_roughness_texture;
 uniform sampler2D u_emissive_texture;
 uniform sampler2D u_normalmap_texture;
+uniform int u_normalmap_flag;
 
 uniform float u_time;
 uniform float u_alpha_cutoff;
@@ -328,10 +338,44 @@ uniform int u_light_type;
 uniform vec3 u_light_position;
 uniform vec3 u_light_direction; 
 
-//layout(location = 0) 
-out vec4 FragColor;
+uniform sampler2D u_shadowmap;
+uniform mat4 u_shadow_viewproj;
+uniform float u_shadow_bias;
+uniform int u_shadowmap_flag;
+
+float computeShadowFactor(sampler2D shadowmap)
+{
+	vec4 proj_pos = u_shadow_viewproj * vec4(v_world_position,1.0); //o v_position?
+
+	//de homogeneus[? ?] a clip space [-1 1]
+	vec2 shadow_uv = proj_pos.xy / proj_pos.w;
+
+	//de clip a uv. Estem agafant els valors del shadowmap que corresponen a l'objecte
+	//en quin pixel del depth buffer esta la info.
+	shadow_uv = shadow_uv*0.5 +vec2(0.5);
+
+	//obtenir el depth de -1 1 (no linear) i normalitzar 
+	float real_depth = (proj_pos.z - u_shadow_bias) / proj_pos.w;
+	real_depth = real_depth * 0.5 + 0.5;
+
+	//obtenir depth del shadowmap de 0 1 (no linear)
+	float shadow_depth = texture( shadowmap, shadow_uv).x;
+
+	//compute final shadow factor by comparing
+	float shadow_factor = 1.0;
+
+	//comparem les dos distancies (no linear). Si realm deth + gran, vol dir que esta mes lluny, pertant
+	//esta darrere d'algo, pertant te shadow
+	if( shadow_depth < real_depth )
+		shadow_factor = 0.0;
+
+	return shadow_factor;
+}
 
 #include "compute_normalmap"
+
+layout(location = 0) out vec4 FragColor;
+layout(location = 1) out vec4 FragColor2;
 
 void main()
 {
@@ -345,10 +389,12 @@ void main()
 
 	//Phong
 	vec3 N = normalize(v_normal);
-	//vec3 N = (v_normal);
-	//vec3 normal_pixel = texture2D(u_normalmap_texture,v_uv).xyz;
-	//N = perturbNormal(N, v_world_position, v_uv, normal_pixel);
-	
+	if(u_normalmap_flag ==1){	//Si te normalmap
+		
+		vec3 normal_pixel = texture2D(u_normalmap_texture,v_uv).xyz;
+		N = perturbNormal(N, v_world_position, v_uv, normal_pixel);
+	}
+		
 	vec3 L;
 	//vec3 V=normalize(u_camera_position.xyz-v_world_position);
 
@@ -363,14 +409,12 @@ void main()
 		L = normalize(L);
 
 		//attenuation
-		
 		float light_distance = length(u_light_position - v_world_position);	//Compute dist
 		att_factor = u_light_max_distance - light_distance;			//Compute linear att factor
 		att_factor /= u_light_max_distance;		//Normalize
 		att_factor = max(att_factor,0.0);		//No negative values
 
 	}
-
 
 	//SpotLight
 	float spot_factor = 1.0;
@@ -386,7 +430,7 @@ void main()
 			spot_factor = pow(spot_cosine,u_light_exponent);
 		}
 		else{	//Outside spot
-			spot_factor = 0.0;	//?????
+			spot_factor = 0.0;
 		}
 	}
 
@@ -396,9 +440,15 @@ void main()
 	//float RdotV = pow( clamp(dot(-R,V),0.0,1.0), u_material_shininess );
 	//vec3 specular=material_specular * light_specular * RdotV;
 
+	//Calcular shadowfactor. Saltar-se els altre calculs???
+	float shadow_factor = 1.0;
+	if (u_normalmap_flag ==1){
+		shadow_factor = computeShadowFactor( u_shadowmap);
+	}
+	
 		
 	//Final
-	light += (NdotL * u_light_color * u_light_intensity * spot_factor * att_factor);
+	light += (NdotL * u_light_color * u_light_intensity * spot_factor * att_factor * shadow_factor);
 		
 	//occlusion
 	light += u_ambient_light * texture(u_metallic_roughness_texture,v_uv).x;
@@ -434,6 +484,24 @@ void main()
 
 	//FragColor = vec4(abs(normalize(v_normal)),1.0);
 	FragColor = vec4(abs(normalize(N)),1.0);
+}
+
+\shadowmap.fs
+
+#version 330 core
+
+uniform vec2 u_camera_nearfar;
+uniform sampler2D u_texture; //depth map
+in vec2 v_uv;
+out vec4 FragColor;
+
+void main()
+{
+	float n = u_camera_nearfar.x;
+	float f = u_camera_nearfar.y;
+	float z = texture2D(u_texture,v_uv).x;
+	float color = n * (z + 1.0) / (f + n - z * (f - n));
+	FragColor = vec4(color);
 }
 
 \uvs.fs

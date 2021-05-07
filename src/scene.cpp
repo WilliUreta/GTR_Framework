@@ -52,7 +52,7 @@ bool GTR::Scene::load(const char* filename)
 	//read global properties
 	background_color = readJSONVector3(json, "background_color", background_color);
 	ambient_light = readJSONVector3(json, "ambient_light", ambient_light );
-
+	
 	//entities
 	cJSON* entities_json = cJSON_GetObjectItemCaseSensitive(json, "entities");
 	cJSON* entity_json;
@@ -147,7 +147,6 @@ void GTR::BaseEntity::renderInMenu()
 }
 
 
-
 GTR::PrefabEntity::PrefabEntity()
 {
 	entity_type = PREFAB;
@@ -185,9 +184,16 @@ GTR::LightEntity::LightEntity()
 	intensity = 1.0;
 	light_type = SPOT;
 
-	max_distance = 300.0;
+	max_distance = 1000.0;
 	cone_angle = 20;
 	area_size = 50;
+
+	viewprojection_matrix.setIdentity();
+	fbo = new FBO();
+	fbo->setDepthOnly(1024, 1024);
+	light_camera = new Camera();
+	bias = 0.0001;
+
 }
 
 void GTR::LightEntity::configure(cJSON* json)		//Modificar per altres entitats
@@ -221,14 +227,22 @@ void GTR::LightEntity::configure(cJSON* json)		//Modificar per altres entitats
 	}
 	if (cJSON_GetObjectItem(json, "direction"))
 	{
-		this->model.setFrontAndOrthonormalize((readJSONVector3(json, "direction", Vector3(0, 0, 0))- this->model.getTranslation()));//target-light position
-		this->model.rotateVector(readJSONVector3(json, "direction", Vector3(0, 0, 0)));	//rotateVector rota el vector SENSE la translacio. Multiplica nomes la part de rotacio de la matriu model
+		//this->model.setFrontAndOrthonormalize((this->model.getTranslation()-readJSONVector3(json, "direction", Vector3(0, -1, 0)))*1 ); //vector de llum a target
+		this->model.setFrontAndOrthonormalize((readJSONVector3(json, "direction", Vector3(0, -1, 0))) ); //vector de llum a target
+		//this->model.rotateVector(readJSONVector3(json, "direction", Vector3(0, 0, 0)));	//rotateVector rota el vector SENSE la translacio. Multiplica nomes la part de rotacio de la matriu model
 //		this->model.lookAt(this->model.getTranslation(), readJSONVector3(json, "direction",Vector3(0,0,0)), Vector3(0.0, 1.0, 0.0));
+			
 	}
 	if (cJSON_GetObjectItem(json, "spot_exponent"))
 	{
 		this->spot_exponent = cJSON_GetObjectItem(json, "spot_exponent")->valuedouble;
 	}
+	if (cJSON_GetObjectItem(json, "intensity"))
+	{
+		this->intensity = cJSON_GetObjectItem(json, "intensity")->valuedouble;
+	}
+
+	this->light_camera->lookAt(this->model.getTranslation(), this->model * Vector3(0, 0, -1), Vector3(0, 1, 0));
 }
 
 void GTR::LightEntity::renderInMenu()
@@ -243,10 +257,10 @@ void GTR::LightEntity::renderInMenu()
 	ImGui::SliderFloat("Cone Angle", &this->cone_angle, 1.0,180.0);
 	ImGui::SliderFloat("Area size",&this->area_size,0.0, 50.0);
 	ImGui::SliderFloat("Intensity", &this->intensity, 0.0, 5.0);
-	ImGui::SliderFloat("Max Distance", &this->max_distance, 10.0, 1000.0);
+	ImGui::SliderFloat("Max Distance", &this->max_distance, 10.0, 1500.0);
 	ImGui::SliderFloat("Spot exponent", &this->spot_exponent, 0.0, 50.0);
-
-	
+	ImGui::SliderFloat("Light Bias", &this->bias, 0.00001, 0.01);
+		
 	ImGui::Combo("Light Type", (int*)&this->light_type, "POINT\0SPOT\0DIRECTIONAL", 3);
 
 #endif
