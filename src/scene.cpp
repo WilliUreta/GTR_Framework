@@ -130,10 +130,14 @@ GTR::BaseEntity* GTR::Scene::createEntity(std::string type)		//Modificar quan vo
 {
 	if (type == "PREFAB")
 		return new GTR::PrefabEntity();
+
 	if (type == "LIGHT")
 		return new GTR::LightEntity();
 	else
 		return NULL;
+
+    return NULL;
+
 }
 
 void GTR::BaseEntity::renderInMenu()
@@ -185,14 +189,14 @@ GTR::LightEntity::LightEntity()
 	light_type = SPOT;
 
 	max_distance = 1000.0;
-	cone_angle = 20;
+	cone_angle = 40;
 	area_size = 50;
 
 	viewprojection_matrix.setIdentity();
 	fbo = new FBO();
 	fbo->setDepthOnly(1024, 1024);
 	light_camera = new Camera();
-	bias = 0.0001;
+	bias = 0.01;
 
 }
 
@@ -228,7 +232,7 @@ void GTR::LightEntity::configure(cJSON* json)		//Modificar per altres entitats
 	if (cJSON_GetObjectItem(json, "direction"))
 	{
 		//this->model.setFrontAndOrthonormalize((this->model.getTranslation()-readJSONVector3(json, "direction", Vector3(0, -1, 0)))*1 ); //vector de llum a target
-		this->model.setFrontAndOrthonormalize((readJSONVector3(json, "direction", Vector3(0, -1, 0))) ); //vector de llum a target
+		this->model.setFrontAndOrthonormalize(( readJSONVector3(json, "direction", Vector3(0, -1, 0))- this->model.getTranslation()) ); //vector de llum a target		//??el -1 per com mirem el front? s'enten mes facil que target sigui la inversa
 		//this->model.rotateVector(readJSONVector3(json, "direction", Vector3(0, 0, 0)));	//rotateVector rota el vector SENSE la translacio. Multiplica nomes la part de rotacio de la matriu model
 //		this->model.lookAt(this->model.getTranslation(), readJSONVector3(json, "direction",Vector3(0,0,0)), Vector3(0.0, 1.0, 0.0));
 			
@@ -242,7 +246,9 @@ void GTR::LightEntity::configure(cJSON* json)		//Modificar per altres entitats
 		this->intensity = cJSON_GetObjectItem(json, "intensity")->valuedouble;
 	}
 
-	this->light_camera->lookAt(this->model.getTranslation(), this->model * Vector3(0, 0, -1), Vector3(0, 1, 0));
+	this->light_camera->lookAt(this->model.getTranslation(), this->model.getTranslation() + this->model.frontVector(), Vector3(0, 1, 0));
+	//this->light_camera->lookAt(this->model.getTranslation(), this->model * Vector3(0.0, 0.0, 1.0), Vector3(0, 1, 0));
+	//this->light_camera->eye
 }
 
 void GTR::LightEntity::renderInMenu()
@@ -259,7 +265,7 @@ void GTR::LightEntity::renderInMenu()
 	ImGui::SliderFloat("Intensity", &this->intensity, 0.0, 5.0);
 	ImGui::SliderFloat("Max Distance", &this->max_distance, 10.0, 1500.0);
 	ImGui::SliderFloat("Spot exponent", &this->spot_exponent, 0.0, 50.0);
-	ImGui::SliderFloat("Light Bias", &this->bias, 0.00001, 0.01);
+	ImGui::SliderFloat("Light Bias", &this->bias, 0.001, 0.1);
 		
 	ImGui::Combo("Light Type", (int*)&this->light_type, "POINT\0SPOT\0DIRECTIONAL", 3);
 

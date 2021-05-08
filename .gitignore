@@ -34,8 +34,9 @@
 
 /.vs
 /visualstudio/.vs
+*.iobj
 *.pdb
-*.pdb
+*.ipdb
 *.tlog
-*.log
+*.tlog
 *.pdb

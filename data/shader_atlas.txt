@@ -369,6 +369,29 @@ float computeShadowFactor(sampler2D shadowmap)
 	if( shadow_depth < real_depth )
 		shadow_factor = 0.0;
 
+	if(u_light_type == 2){	
+		
+		//it is outside on the sides
+		if( shadow_uv.x < 0.0 || shadow_uv.x > 1.0 ||
+			shadow_uv.y < 0.0 || shadow_uv.y > 1.0 )
+				return 1.0;
+
+		//it is before near or behind far plane
+		if(real_depth < 0.0 || real_depth > 1.0)
+			return 1.0;
+	
+	}else{
+		//it is outside on the sides
+		if( shadow_uv.x < 0.0 || shadow_uv.x > 1.0 ||
+			shadow_uv.y < 0.0 || shadow_uv.y > 1.0 )
+				return 0.0;
+
+		//it is before near or behind far plane
+		if(real_depth < 0.0 || real_depth > 1.0)
+			return 0.0;
+	
+	}
+
 	return shadow_factor;
 }
 
@@ -399,9 +422,14 @@ void main()
 	//vec3 V=normalize(u_camera_position.xyz-v_world_position);
 
 	float att_factor = (1.0);
-
+	float shadow_factor = 1.0;
+	
 	if(u_light_type == 2){	//directional light
 		L = -normalize(u_light_direction);
+			
+		if (u_shadowmap_flag ==1){	//ShadowFactor
+			shadow_factor = computeShadowFactor( u_shadowmap);
+		}
 	}
 	else{					// Point and spot light
 		L = u_light_position-v_world_position;
@@ -432,6 +460,10 @@ void main()
 		else{	//Outside spot
 			spot_factor = 0.0;
 		}
+	
+		if (u_shadowmap_flag ==1){	//ShadowFactor
+			shadow_factor = computeShadowFactor( u_shadowmap);
+		}
 	}
 
 	vec3 R=normalize(reflect(L,N));
@@ -441,12 +473,7 @@ void main()
 	//vec3 specular=material_specular * light_specular * RdotV;
 
 	//Calcular shadowfactor. Saltar-se els altre calculs???
-	float shadow_factor = 1.0;
-	if (u_normalmap_flag ==1){
-		shadow_factor = computeShadowFactor( u_shadowmap);
-	}
-	
-		
+			
 	//Final
 	light += (NdotL * u_light_color * u_light_intensity * spot_factor * att_factor * shadow_factor);
 		

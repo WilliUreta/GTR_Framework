@@ -73,16 +73,11 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 	//This class will be the one in charge of rendering all 
 	renderer = new GTR::Renderer(); //here so we have opengl ready in constructor
-
-	//NOU!!
+	
+									//NOU!!
 	renderCall = new GTR::RenderCall();
 	renderCall_blend = new GTR::RenderCall();
 
-	//FBO per shadowmaps
-	/*texture = new Texture();
-	fbo = new FBO();
-	fbo->setTexture(texture);
-	*/
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse
 }
@@ -98,7 +93,6 @@ void Application::render(void)
 
 	//set default flags
 	glDisable(GL_BLEND);
-    
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	if(render_wireframe)
@@ -109,26 +103,29 @@ void Application::render(void)
 	//lets render something
 	//Matrix44 model;
 	//renderer->renderPrefab( model, prefab, camera );
-	
-	//
-	//*camera = *scene->light_entities[0]->light_camera;
-	camera->enable();
-	
+
+	//*camera = *scene->light_entities[0]->light_camera;	//camera al lloc de la llum
+	//camera->enable();
+
 	renderer->renderScene(scene, camera);
 	renderer->orderRenderCalls();
+
+	renderer->generateShadowMaps(scene);
 	
-	//renderer->generateShadowMaps(scene);		//save no, generate etc...
-	//renderer->showShadowMap(scene->light_entities[0]);
+	int w = Application::instance->window_width;
+	int h = Application::instance->window_height;
+	/*glViewport(0, 0, w * 0.3, h * 0.3);	
+	renderer->showShadowMap(scene->light_entities[0]);
+	/*glViewport(0.3*w, 0, w * 0.3, h * 0.3);
+	renderer->showShadowMap(scene->light_entities[1]);
 	
-	//camera->enable();
+	glViewport(0.0, h * 0.3, w , h*0.7 );*/
+	
+	camera->enable();
 	renderer->renderRenderCall(camera);		//Main renderer
 
-		
-	//texture->toViewport();
-	//Draw the floor grid, helpful to have a reference point
-	/*if(render_debug)
-		drawGrid();
-	*/
+	//glViewport( 0, 0, w , h );
+	
     glDisable(GL_DEPTH_TEST);
     //render anything in the gui after this
 
@@ -297,18 +294,6 @@ void Application::renderDebugGUI(void)
 		if (ImGui::IsItemClicked(0))
 			selected_entity = entity;
 	}
-	
-	/*for (int i = 0; i < scene->light_entities.size(); i++) {
-
-		GTR::LightEntity* lentity = scene->light_entities[i];
-
-		if (ImGui::TreeNode(lentity, lentity->name.c_str()))
-		{
-			lentity->renderInMenu();
-			ImGui::TreePop();
-		}
-
-	}*/
 
 	ImGui::PopStyleColor();
 #endif
