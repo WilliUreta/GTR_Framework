@@ -4,6 +4,7 @@
 #include "framework.h"
 #include "fbo.h"
 #include "application.h"
+#include "camera.h"
 #include <string>
 
 //forward declaration
@@ -12,6 +13,8 @@ class cJSON;
 
 //our namespace
 namespace GTR {
+
+
 
 	enum eEntityType {
 		NONE = 0,
@@ -93,6 +96,7 @@ namespace GTR {
 		Vector3 background_color;
 		Vector3 ambient_light;
 		const static int max_lights = 5;
+		Camera main_camera;
 
 		Scene();
 

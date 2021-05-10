@@ -71,6 +71,9 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	if (!scene->load("data/scene.json"))
 		exit(1);
 
+	camera->lookAt(scene->main_camera.eye, scene->main_camera.center, Vector3(0, 1, 0));
+	camera->fov = scene->main_camera.fov;
+
 	//This class will be the one in charge of rendering all 
 	renderer = new GTR::Renderer(); //here so we have opengl ready in constructor
 	
@@ -305,7 +308,12 @@ void Application::onKeyDown( SDL_KeyboardEvent event )
 		case SDLK_F1: render_debug = !render_debug; break;
 		case SDLK_f: camera->center.set(0, 0, 0); camera->updateViewMatrix(); break;
 		case SDLK_F4: Shader::ReloadAll(); break;		//No em va el F5...
-		case SDLK_F6: scene->clear(); scene->load(scene->filename.c_str()); selected_entity = NULL;  break;
+		case SDLK_F6:
+			scene->clear();
+			scene->load(scene->filename.c_str());
+			camera->lookAt(scene->main_camera.eye, scene->main_camera.center, Vector3(0, 1, 0));
+			camera->fov = scene->main_camera.fov;
+			break;
 		case SDLK_1: renderer->render_mode = GTR::eRenderMode::NORMALS; break;
 		case SDLK_2: renderer->render_mode = GTR::eRenderMode::TEXTURE; break;
 		case SDLK_3: renderer->render_mode = GTR::eRenderMode::UVS; break;

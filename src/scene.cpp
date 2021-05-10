@@ -52,7 +52,10 @@ bool GTR::Scene::load(const char* filename)
 	//read global properties
 	background_color = readJSONVector3(json, "background_color", background_color);
 	ambient_light = readJSONVector3(json, "ambient_light", ambient_light );
-	
+	main_camera.eye = readJSONVector3(json, "camera_position", main_camera.eye);
+	main_camera.center = readJSONVector3(json, "camera_target", main_camera.center);
+	main_camera.fov = readJSONNumber(json, "camera_fov", main_camera.fov);
+
 	//entities
 	cJSON* entities_json = cJSON_GetObjectItemCaseSensitive(json, "entities");
 	cJSON* entity_json;
@@ -96,6 +99,13 @@ bool GTR::Scene::load(const char* filename)
 			Matrix44 R;
 			q.toMatrix(R);
 			ent->model = R * ent->model;
+		}
+
+		if (cJSON_GetObjectItem(entity_json, "target"))
+		{
+			Vector3 target = readJSONVector3(entity_json, "target", Vector3());
+			Vector3 front = target - ent->model.getTranslation();
+			ent->model.setFrontAndOrthonormalize(front);
 		}
 
 		if (cJSON_GetObjectItem(entity_json, "scale"))

@@ -39,4 +39,8 @@
 *.ipdb
 *.tlog
 *.tlog
+<<<<<<< HEAD
 *.pdb
+=======
+*.tlog
+>>>>>>> master
