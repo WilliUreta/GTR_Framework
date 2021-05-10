@@ -79,6 +79,7 @@ namespace GTR {
 		Camera* light_camera;
 		FBO* fbo;
 		float bias;
+		bool cast_shadows;
 		
 		LightEntity();
 		virtual void renderInMenu();

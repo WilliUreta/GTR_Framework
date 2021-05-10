@@ -204,17 +204,19 @@ GTR::LightEntity::LightEntity()
 
 	viewprojection_matrix.setIdentity();
 	fbo = new FBO();
-	fbo->setDepthOnly(1024, 1024);
+	//fbo->setDepthOnly(1024, 1024);
+	fbo->setDepthOnly(2048, 2048);
 	light_camera = new Camera();
 	bias = 0.01;
+	cast_shadows = true;
 
 }
 
 void GTR::LightEntity::configure(cJSON* json)		//Modificar per altres entitats
 {
-	if (cJSON_GetObjectItem(json, "distance"))
+	if (cJSON_GetObjectItem(json, "max_dist"))
 	{
-		this->max_distance = cJSON_GetObjectItem(json, "distance")->valuedouble;
+		this->max_distance = cJSON_GetObjectItem(json, "max_dist")->valuedouble;
 	}
 	if (cJSON_GetObjectItem(json, "cone_angle"))
 	{
@@ -239,21 +241,31 @@ void GTR::LightEntity::configure(cJSON* json)		//Modificar per altres entitats
 			this->light_type = eLightType(DIRECTIONAL);
 		
 	}
-	if (cJSON_GetObjectItem(json, "direction"))
+	if (cJSON_GetObjectItem(json, "target"))
 	{
 		//this->model.setFrontAndOrthonormalize((this->model.getTranslation()-readJSONVector3(json, "direction", Vector3(0, -1, 0)))*1 ); //vector de llum a target
-		this->model.setFrontAndOrthonormalize(( readJSONVector3(json, "direction", Vector3(0, -1, 0))- this->model.getTranslation()) ); //vector de llum a target		//??el -1 per com mirem el front? s'enten mes facil que target sigui la inversa
+		this->model.setFrontAndOrthonormalize(( readJSONVector3(json, "target", Vector3(0, -1, 0))- this->model.getTranslation()) ); //vector de llum a target		//??el -1 per com mirem el front? s'enten mes facil que target sigui la inversa
 		//this->model.rotateVector(readJSONVector3(json, "direction", Vector3(0, 0, 0)));	//rotateVector rota el vector SENSE la translacio. Multiplica nomes la part de rotacio de la matriu model
 //		this->model.lookAt(this->model.getTranslation(), readJSONVector3(json, "direction",Vector3(0,0,0)), Vector3(0.0, 1.0, 0.0));
 			
 	}
-	if (cJSON_GetObjectItem(json, "spot_exponent"))
+	if (cJSON_GetObjectItem(json, "cone_exp"))
 	{
-		this->spot_exponent = cJSON_GetObjectItem(json, "spot_exponent")->valuedouble;
+		this->spot_exponent = cJSON_GetObjectItem(json, "cone_exp")->valuedouble;
 	}
 	if (cJSON_GetObjectItem(json, "intensity"))
 	{
 		this->intensity = cJSON_GetObjectItem(json, "intensity")->valuedouble;
+	}
+	if (cJSON_GetObjectItem(json, "shadow_bias"))
+	{
+		this->bias = cJSON_GetObjectItem(json, "shadow_bias")->valuedouble;
+	}
+	if (cJSON_GetObjectItem(json, "cast_shadows"))
+	{
+		//this->cast_shadows = (bool)cJSON_GetObjectItem(json, "cast_shadows")->valueint;
+		this->cast_shadows = readJSONBool(json, "cast_shadows", false);
+
 	}
 
 	this->light_camera->lookAt(this->model.getTranslation(), this->model.getTranslation() + this->model.frontVector(), Vector3(0, 1, 0));
@@ -276,6 +288,7 @@ void GTR::LightEntity::renderInMenu()
 	ImGui::SliderFloat("Max Distance", &this->max_distance, 10.0, 2500.0);
 	ImGui::SliderFloat("Spot exponent", &this->spot_exponent, 0.0, 50.0);
 	ImGui::SliderFloat("Light Bias", &this->bias, 0.001, 0.1);
+	ImGui::Checkbox("Use ShadowMaps", &this->cast_shadows);
 		
 	ImGui::Combo("Light Type", (int*)&this->light_type, "POINT\0SPOT\0DIRECTIONAL", 3);
 

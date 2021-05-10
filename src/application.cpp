@@ -263,8 +263,7 @@ void Application::renderDebugGUI(void)
 	ImGui::Checkbox("Wireframe", &render_wireframe);
 	ImGui::ColorEdit3("BG color", scene->background_color.v);
 	ImGui::ColorEdit3("Ambient Light", scene->ambient_light.v);
-	ImGui::Checkbox("Use ShadowMaps", &renderer->use_shadowmap);
-	ImGui::Checkbox("Use ShadowMaps", &renderer->show_shadowmap);
+	ImGui::Checkbox("Show ShadowMaps", &renderer->show_shadowmap);
 
 	//add info to the debug panel about the camera
 	if (ImGui::TreeNode(camera, "Camera")) {

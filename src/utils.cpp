@@ -562,3 +562,11 @@ Vector4 readJSONVector4(cJSON* obj, const char* name)
 	}
 	return Vector4();
 }
+
+bool readJSONBool(cJSON* obj, const char* name, bool default_value)
+{
+	cJSON* str_json = cJSON_GetObjectItemCaseSensitive((cJSON*)obj, name);
+	if (!str_json || (str_json->type != cJSON_False && str_json->type != cJSON_True))
+		return default_value;
+	return str_json->valueint;
+}

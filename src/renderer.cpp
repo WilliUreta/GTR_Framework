@@ -21,6 +21,7 @@ Renderer::Renderer() {
 
 	render_mode = eRenderMode::MULTI_PATH;
 	use_shadowmap = 1;
+	show_shadowmap = 1;
 }
 
 
@@ -83,7 +84,11 @@ void Renderer::renderNode(const Matrix44& prefab_model, GTR::Node* node, Camera*
 
 			float dist = camera->eye.distance(world_bounding.center);
 			RenderCall temp_data = { node_model, node, dist };
-			if(node->material->alpha_mode== GTR::eAlphaMode::NO_ALPHA)
+			/*if(node->material->alpha_mode== GTR::eAlphaMode::NO_ALPHA)
+				this->renderCall_vector.push_back(temp_data);
+			else
+				this->renderCall_blend_vector.push_back(temp_data);*/
+			if(!(node->material->alpha_mode== GTR::eAlphaMode::BLEND))
 				this->renderCall_vector.push_back(temp_data);
 			else
 				this->renderCall_blend_vector.push_back(temp_data);
@@ -183,7 +188,10 @@ void GTR::Renderer::renderShadowMap(const Matrix44 model, Mesh* mesh, GTR::Mater
 		glEnable(GL_CULL_FACE);
 	assert(glGetError() == GL_NO_ERROR);
 
-	shader = Shader::Get("flat");
+	shader = Shader::Get("texture");
+	Texture* color_texture = material->color_texture.texture;
+	if (color_texture == NULL)
+		color_texture = Texture::getWhiteTexture();
 
 	assert(glGetError() == GL_NO_ERROR);
 
@@ -196,9 +204,12 @@ void GTR::Renderer::renderShadowMap(const Matrix44 model, Mesh* mesh, GTR::Mater
 	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader->setUniform("u_camera_pos", camera->eye);
 	shader->setUniform("u_model", model);
-	shader->setUniform("u_color", Vector4(1.0, 1.0, 1.0,1.0));
+	shader->setUniform("u_color", Vector4(1.0,1.0,1.0,1.0));
+	if (color_texture)
+		shader->setUniform("u_texture", color_texture, 0);
 	float t = getTime();
 	shader->setUniform("u_time", t);
+	shader->setUniform("u_alpha_cutoff", material->alpha_mode == GTR::eAlphaMode::MASK ? material->alpha_cutoff : 0);
 
 	mesh->render(GL_TRIANGLES);
 
@@ -431,7 +442,7 @@ void GTR::Renderer::renderMeshWithMaterialMulti(const Matrix44 model, Mesh* mesh
 
 		}
 		//ShadowMaps, nomes si es spot o directional
-		if (use_shadowmap == 1) {
+		if (scene->light_entities[i]->cast_shadows == 1) {
 
 			Texture* shadowmap = scene->light_entities[i]->fbo->depth_texture;
 			Matrix44 shadow_viewproj = scene->light_entities[i]->light_camera->viewprojection_matrix;
@@ -439,10 +450,10 @@ void GTR::Renderer::renderMeshWithMaterialMulti(const Matrix44 model, Mesh* mesh
 			shader->setTexture("u_shadowmap", shadowmap, 7);
 			shader->setUniform("u_shadow_viewproj", shadow_viewproj);
 			shader->setUniform("u_shadow_bias", scene->light_entities[i]->bias);
-			shader->setUniform("u_shadowmap_flag", (int)use_shadowmap);
+			shader->setUniform("u_shadowmap_flag", (int)scene->light_entities[i]->cast_shadows);
 		}
 		else {
-			shader->setUniform("u_shadowmap_flag", (int)use_shadowmap);
+			shader->setUniform("u_shadowmap_flag", (int)scene->light_entities[i]->cast_shadows);
 		}
 
 		shader->setUniform("u_light_color", scene->light_entities[i]->color);
