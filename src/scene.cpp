@@ -188,7 +188,7 @@ GTR::LightEntity::LightEntity()
 	intensity = 1.0;
 	light_type = SPOT;
 
-	max_distance = 1000.0;
+	max_distance = 1500.0;
 	cone_angle = 40;
 	area_size = 50;
 
@@ -263,7 +263,7 @@ void GTR::LightEntity::renderInMenu()
 	ImGui::SliderFloat("Cone Angle", &this->cone_angle, 1.0,180.0);
 	ImGui::SliderFloat("Area size",&this->area_size,0.0, 50.0);
 	ImGui::SliderFloat("Intensity", &this->intensity, 0.0, 5.0);
-	ImGui::SliderFloat("Max Distance", &this->max_distance, 10.0, 1500.0);
+	ImGui::SliderFloat("Max Distance", &this->max_distance, 10.0, 2500.0);
 	ImGui::SliderFloat("Spot exponent", &this->spot_exponent, 0.0, 50.0);
 	ImGui::SliderFloat("Light Bias", &this->bias, 0.001, 0.1);
 		

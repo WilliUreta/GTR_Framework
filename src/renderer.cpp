@@ -24,7 +24,7 @@ Renderer::Renderer() {
 }
 
 
-void Renderer::renderScene(GTR::Scene* scene, Camera* camera)
+void Renderer::getSceneRenderCalls(GTR::Scene* scene, Camera* camera)
 {
 	//set the clear color (the background color)
 	glClearColor(scene->background_color.x, scene->background_color.y, scene->background_color.z, 1.0);
@@ -81,14 +81,7 @@ void Renderer::renderNode(const Matrix44& prefab_model, GTR::Node* node, Camera*
 		if (camera->testBoxInFrustum(world_bounding.center, world_bounding.halfsize) )
 		{
 
-			//render node mesh
-
-			//renderMeshWithMaterial( node_model, node->mesh, node->material, camera );
-			
-			//node->mesh->renderBounding(node_model, true);
-
 			float dist = camera->eye.distance(world_bounding.center);
-			
 			RenderCall temp_data = { node_model, node, dist };
 			if(node->material->alpha_mode== GTR::eAlphaMode::NO_ALPHA)
 				this->renderCall_vector.push_back(temp_data);
@@ -97,7 +90,6 @@ void Renderer::renderNode(const Matrix44& prefab_model, GTR::Node* node, Camera*
 
 		}
 	}
-
 	//iterate recursively with children
 	for (int i = 0; i < node->children.size(); ++i)
 		renderNode(prefab_model, node->children[i], camera);
@@ -109,18 +101,22 @@ void GTR::Renderer::orderRenderCalls()
 	std::sort(this->renderCall_blend_vector.begin(), this->renderCall_blend_vector.end(), RenderCall::orderer_distance());
 }
 
-
 void GTR::Renderer::renderRenderCall(Camera* camera)
 {
 
 	for (int i = 0; i < this->renderCall_vector.size(); ++i) {			//Render directe del vector de renderCalls opacs, "ordenat"
-		//Podre accedir a scene->ambient_light?
+		
 		this->renderMeshWithMaterial(this->renderCall_vector[i].node_model, this->renderCall_vector[i].node->mesh, this->renderCall_vector[i].node->material, camera);
 	}
 	for (int i = 0; i < this->renderCall_blend_vector.size(); ++i) {			//Render directe del vector de renderCalls blend, "ordenat"
-		//Podre accedir a scene->ambient_light?
+		
 		this->renderMeshWithMaterial(this->renderCall_blend_vector[i].node_model, this->renderCall_blend_vector[i].node->mesh, this->renderCall_blend_vector[i].node->material, camera);
 	}
+
+	//Draw the floor grid, helpful to have a reference point
+	/*if (Application::instance->render_debug)
+		drawGrid();
+	*/
 
 }
 
@@ -137,15 +133,11 @@ void GTR::Renderer::generateShadowMaps(GTR::Scene* scene)
 		light->light_camera->lookAt(light->model.getTranslation(), light->model.getTranslation() + light->model.frontVector(), Vector3(0, 1, 0));
 
 		if (light->light_type == SPOT) {
-			light->light_camera->setPerspective(light->cone_angle*2,1, 1.0f, light->max_distance);	//aspect ratio 1 per cabre a 512x512, manera perque pugui no ser quadrat?
-																																									
+			light->light_camera->setPerspective(light->cone_angle*2,1, 1.0f, light->max_distance);	//aspect ratio 1 per cabre a 512x512, manera perque pugui no ser quadrat?																																				
 		}
 		else	//directional
 		{
-			
-			light->light_camera->setOrthographic(0,1000,0,1000,1.0,10000);	//light->max_distance
-			//shadow_camera->frustum = ??	//DEFINIR
-
+			light->light_camera->setOrthographic(-1024,1024, -1024, 1024,1.0f, light->max_distance);	//light->max_distance
 		}
 						
 		if (light->fbo == NULL) {
@@ -168,8 +160,7 @@ void GTR::Renderer::generateShadowMaps(GTR::Scene* scene)
 
 		light->fbo->unbind();
 		glColorMask(true, true, true, true);	
-		//scene->light_entities[i]->viewprojection_matrix = shadow_camera->viewprojection_matrix;
-		
+				
 	}
 	
 }
@@ -196,7 +187,6 @@ void GTR::Renderer::renderShadowMap(const Matrix44 model, Mesh* mesh, GTR::Mater
 
 	assert(glGetError() == GL_NO_ERROR);
 
-	
 	//no shader? then nothing to render
 	if (!shader)
 		return;
@@ -216,18 +206,31 @@ void GTR::Renderer::renderShadowMap(const Matrix44 model, Mesh* mesh, GTR::Mater
 
 }
 
-void GTR::Renderer::showShadowMap(GTR::LightEntity* light)
+void GTR::Renderer::showShadowMaps( int w, int h)
 {
 	glDisable(GL_DEPTH_TEST);
+	GTR::Scene* scene = GTR::Scene::instance;
+	float divisions = 1.0/scene->light_entities.size();
+	for (int i = 0; i < scene->light_entities.size(); ++i) {
+
+		//les llums a sota
+		glViewport( divisions *i*w, 0.0, w * divisions, h * 0.25);
+		showShadowMap(scene->light_entities[i]);
+
+	}
+	glEnable(GL_DEPTH_TEST);
+	glViewport(0, 0, w, h);
+}
+
+void GTR::Renderer::showShadowMap(GTR::LightEntity* light)
+{
 	Shader* zshader = Shader::Get("depth");
 	zshader->enable();
 	zshader->setUniform("u_camera_nearfar", Vector2(light->light_camera->near_plane, light->light_camera->far_plane));
 	light->fbo->depth_texture->toViewport(zshader);
 	zshader->disable();
-		
-	glEnable(GL_DEPTH_TEST);
-}
 
+}
 
 //renders a mesh given its transform and material
 void Renderer::renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera)
@@ -320,116 +323,12 @@ void Renderer::renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Mat
 	
 	
 	if (scene->light_entities.size()>0 && this->render_mode== eRenderMode::MULTI_PATH) {
-		glDepthFunc(GL_LEQUAL);		//Permet pintar al mateix depth
-
-		for (int i = 0; i < scene->light_entities.size(); ++i) {			//Render directe del vector de renderCalls, "ordenat"
-			
-			if (i == 0 && !(material->alpha_mode == BLEND)) {	//Primera passada i no blend, pinta sense blend
-				glDisable(GL_BLEND);
-			}
-			else {
-				glEnable(GL_BLEND);
-				shader->setUniform("u_ambient_light", Vector3(0.0,0.0,0.0));
-				shader->setUniform("u_emissive_factor", Vector3(0.0, 0.0, 0.0));
-
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-			}
-			if (material->alpha_mode == BLEND) {
-
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				
-			}
-			//ShadowMaps, nomes si es spot o directional
-			if (use_shadowmap == 1) {
-
-				Texture* shadowmap = scene->light_entities[i]->fbo->depth_texture;
-				Matrix44 shadow_viewproj = scene->light_entities[i]->light_camera->viewprojection_matrix;
-
-				shader->setTexture("u_shadowmap", shadowmap, 7);
-				shader->setUniform("u_shadow_viewproj", shadow_viewproj);
-				shader->setUniform("u_shadow_bias", scene->light_entities[i]->bias);
-				shader->setUniform("u_shadowmap_flag", (int)use_shadowmap);
-
-			}
-			else {
-				shader->setUniform("u_shadowmap_flag", (int)use_shadowmap);
-			}
-			
-			shader->setUniform("u_light_color", scene->light_entities[i]->color);
-			shader->setUniform("u_light_intensity", scene->light_entities[i]->intensity);
-			shader->setUniform("u_light_max_distance", scene->light_entities[i]->max_distance);
-			shader->setUniform("u_light_cone_angle", scene->light_entities[i]->cone_angle);
-			shader->setUniform("u_light_exponent", scene->light_entities[i]->spot_exponent);
-					
-			shader->setUniform("u_light_type", scene->light_entities[i]->light_type);
-			shader->setUniform("u_light_position", scene->light_entities[i]->model.getTranslation());
-			shader->setUniform("u_light_direction", scene->light_entities[i]->model.frontVector());
-			
-			//this is used to say which is the alpha threshold to what we should not paint a pixel on the screen (to cut polygons according to texture alpha)
-			shader->setUniform("u_alpha_cutoff", material->alpha_mode == GTR::eAlphaMode::MASK ? material->alpha_cutoff : 0);
-			shader->setUniform("u_normalmap_flag", normalmap_flag);
-
-			//do the draw call that renders the mesh into the screen
-			mesh->render(GL_TRIANGLES);
-
-		}
-		cont:	//https://stackoverflow.com/questions/41179629/how-to-use-something-like-a-continue-statement-in-nested-for-loops
-		glDepthFunc(GL_LESS);	//Default
-		glDisable(GL_BLEND);
+		
+		renderMeshWithMaterialMulti(model, mesh, material, camera, scene, shader, normalmap_flag);
 	}
 	else if(scene->light_entities.size() > 0 && this->render_mode == eRenderMode::SINGLE_PATH) {
 
-		Vector3 light_color[GTR::Scene::max_lights] = {};
-		float light_intensity[GTR::Scene::max_lights] = {};
-		float light_max_dist[GTR::Scene::max_lights] = {};
-		float light_cone_angle[GTR::Scene::max_lights] = {};
-				
-		float light_exponent[GTR::Scene::max_lights] = {};
-		int light_type[GTR::Scene::max_lights] = {};
-		Vector3 light_position[GTR::Scene::max_lights] = {};
-		Vector3 light_direction[GTR::Scene::max_lights] = {};
-		
-		for (int i = 0; i < scene->light_entities.size(); ++i) {			//Render directe del vector de renderCalls, "ordenat"
-			if (scene->light_entities[i]->entity_type == LIGHT) {
-
-				light_color[i] = scene->light_entities[i]->color;
-				light_intensity[i] = scene->light_entities[i]->intensity;
-				light_max_dist[i] = scene->light_entities[i]->max_distance;
-				light_cone_angle[i] = scene->light_entities[i]->cone_angle;
-
-				light_exponent[i] = scene->light_entities[i]->spot_exponent;
-				light_type[i] = scene->light_entities[i]->light_type;
-				light_position[i] = scene->light_entities[i]->model.getTranslation();
-				light_direction[i] = scene->light_entities[i]->model.frontVector();
-				//light_direction[i] = scene->light_entities[i]->model.frontVector() * Vector3(-1.0, -1.0, -1.0);
-			}
-		}
-		
-		int light_size = scene->light_entities.size();
-
-		shader->setUniform3Array("u_light_color", (float*)light_color, light_size);
-		shader->setUniform1Array("u_light_intensity", (float*)light_intensity, light_size);
-		shader->setUniform1Array("u_light_max_distance", (float*)light_max_dist, light_size);
-		shader->setUniform1Array("u_light_cone_angle", (float*)light_cone_angle, light_size);
-	
-		shader->setUniform1Array("u_light_exponent", (float*)light_exponent, light_size);
-		shader->setUniform1Array("u_light_type", light_type, light_size);
-		shader->setUniform3Array("u_light_position", (float*)light_position, light_size);
-		//shader->setUniform("u_light_direction", scene->light_entities[i]->temporal_dir);	//arbitrari
-		shader->setUniform3Array("u_light_direction", (float*)light_direction, light_size);
-		//shader->setUniform("u_light_direction", scene->light_entities[i]->model.frontVector());
-
-		shader->setUniform("u_num_lights", (int)scene->light_entities.size());
-	
-		//this is used to say which is the alpha threshold to what we should not paint a pixel on the screen (to cut polygons according to texture alpha)
-		shader->setUniform("u_alpha_cutoff", material->alpha_mode == GTR::eAlphaMode::MASK ? material->alpha_cutoff : 0);
-		shader->setUniform("u_normalmap_flag", normalmap_flag);
-
-		//do the draw call that renders the mesh into the screen
-		mesh->render(GL_TRIANGLES);
-
-	
+		renderMeshWithMaterialSingle(model,mesh,material,camera,scene,shader,normalmap_flag);
 	}
 	else {
 		//this is used to say which is the alpha threshold to what we should not paint a pixel on the screen (to cut polygons according to texture alpha)
@@ -454,20 +353,119 @@ void Renderer::renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Mat
 
 	//set the render state as it was before to avoid problems with future renders
 	glDisable(GL_BLEND);
-	
-	//Draw the floor grid, helpful to have a reference point
-	/*if (Application::instance->render_debug)
-		drawGrid();
-	*/
 }
 
-void GTR::Renderer::renderMeshWithMaterialSingle(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera)
+void GTR::Renderer::renderMeshWithMaterialSingle(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera,Scene* scene, Shader* shader, int normalmap_flag)
 {
+
+	Vector3 light_color[GTR::Scene::max_lights] = {};
+	float light_intensity[GTR::Scene::max_lights] = {};
+	float light_max_dist[GTR::Scene::max_lights] = {};
+	float light_cone_angle[GTR::Scene::max_lights] = {};
+
+	float light_exponent[GTR::Scene::max_lights] = {};
+	int light_type[GTR::Scene::max_lights] = {};
+	Vector3 light_position[GTR::Scene::max_lights] = {};
+	Vector3 light_direction[GTR::Scene::max_lights] = {};
+
+	for (int i = 0; i < scene->light_entities.size(); ++i) {			//Render directe del vector de renderCalls, "ordenat"
+		if (scene->light_entities[i]->entity_type == LIGHT) {
+
+			light_color[i] = scene->light_entities[i]->color;
+			light_intensity[i] = scene->light_entities[i]->intensity;
+			light_max_dist[i] = scene->light_entities[i]->max_distance;
+			light_cone_angle[i] = scene->light_entities[i]->cone_angle;
+
+			light_exponent[i] = scene->light_entities[i]->spot_exponent;
+			light_type[i] = scene->light_entities[i]->light_type;
+			light_position[i] = scene->light_entities[i]->model.getTranslation();
+			light_direction[i] = scene->light_entities[i]->model.frontVector();
+			//light_direction[i] = scene->light_entities[i]->model.frontVector() * Vector3(-1.0, -1.0, -1.0);
+		}
+	}
+
+	int light_size = scene->light_entities.size();
+
+	shader->setUniform3Array("u_light_color", (float*)light_color, light_size);
+	shader->setUniform1Array("u_light_intensity", (float*)light_intensity, light_size);
+	shader->setUniform1Array("u_light_max_distance", (float*)light_max_dist, light_size);
+	shader->setUniform1Array("u_light_cone_angle", (float*)light_cone_angle, light_size);
+
+	shader->setUniform1Array("u_light_exponent", (float*)light_exponent, light_size);
+	shader->setUniform1Array("u_light_type", light_type, light_size);
+	shader->setUniform3Array("u_light_position", (float*)light_position, light_size);
+	//shader->setUniform("u_light_direction", scene->light_entities[i]->temporal_dir);	//arbitrari
+	shader->setUniform3Array("u_light_direction", (float*)light_direction, light_size);
+	//shader->setUniform("u_light_direction", scene->light_entities[i]->model.frontVector());
+
+	shader->setUniform("u_num_lights", (int)scene->light_entities.size());
+
+	//this is used to say which is the alpha threshold to what we should not paint a pixel on the screen (to cut polygons according to texture alpha)
+	shader->setUniform("u_alpha_cutoff", material->alpha_mode == GTR::eAlphaMode::MASK ? material->alpha_cutoff : 0);
+	shader->setUniform("u_normalmap_flag", normalmap_flag);
+
+	//do the draw call that renders the mesh into the screen
+	mesh->render(GL_TRIANGLES);
 }
 
-void GTR::Renderer::renderMeshWithMaterialMulti(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera)
+void GTR::Renderer::renderMeshWithMaterialMulti(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera, Scene* scene, Shader* shader,int normalmap_flag)
 {
+	glDepthFunc(GL_LEQUAL);		//Permet pintar al mateix depth
 
+	for (int i = 0; i < scene->light_entities.size(); ++i) {			//Render directe del vector de renderCalls, "ordenat"
+
+		if (i == 0 && !(material->alpha_mode == BLEND)) {	//Primera passada i no blend, pinta sense blend
+			glDisable(GL_BLEND);
+		}
+		else {
+			glEnable(GL_BLEND);
+			shader->setUniform("u_ambient_light", Vector3(0.0, 0.0, 0.0));
+			shader->setUniform("u_emissive_factor", Vector3(0.0, 0.0, 0.0));
+
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		}
+		if (material->alpha_mode == BLEND) {
+
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		}
+		//ShadowMaps, nomes si es spot o directional
+		if (use_shadowmap == 1) {
+
+			Texture* shadowmap = scene->light_entities[i]->fbo->depth_texture;
+			Matrix44 shadow_viewproj = scene->light_entities[i]->light_camera->viewprojection_matrix;
+
+			shader->setTexture("u_shadowmap", shadowmap, 7);
+			shader->setUniform("u_shadow_viewproj", shadow_viewproj);
+			shader->setUniform("u_shadow_bias", scene->light_entities[i]->bias);
+			shader->setUniform("u_shadowmap_flag", (int)use_shadowmap);
+		}
+		else {
+			shader->setUniform("u_shadowmap_flag", (int)use_shadowmap);
+		}
+
+		shader->setUniform("u_light_color", scene->light_entities[i]->color);
+		shader->setUniform("u_light_intensity", scene->light_entities[i]->intensity);
+		shader->setUniform("u_light_max_distance", scene->light_entities[i]->max_distance);
+		shader->setUniform("u_light_cone_angle", scene->light_entities[i]->cone_angle);
+		shader->setUniform("u_light_exponent", scene->light_entities[i]->spot_exponent);
+
+		shader->setUniform("u_light_type", scene->light_entities[i]->light_type);
+		shader->setUniform("u_light_position", scene->light_entities[i]->model.getTranslation());
+		shader->setUniform("u_light_direction", scene->light_entities[i]->model.frontVector());
+
+		//this is used to say which is the alpha threshold to what we should not paint a pixel on the screen (to cut polygons according to texture alpha)
+		shader->setUniform("u_alpha_cutoff", material->alpha_mode == GTR::eAlphaMode::MASK ? material->alpha_cutoff : 0);
+		shader->setUniform("u_normalmap_flag", normalmap_flag);
+
+		//do the draw call that renders the mesh into the screen
+		mesh->render(GL_TRIANGLES);
+
+	}
+
+	glDepthFunc(GL_LESS);	//Default
+	glDisable(GL_BLEND);
 
 }
 

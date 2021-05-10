@@ -213,13 +213,10 @@ uniform int u_light_type[MAX_LIGHTS];
 uniform vec3 u_light_position[MAX_LIGHTS];
 uniform vec3 u_light_direction[MAX_LIGHTS]; 
 
-//layout(location = 0) 
-out vec4 FragColor;
-
 #include "compute_normalmap"
 
-layout(location = 0) out vec4 fragColor;
-layout(location = 1) out vec4 fragColor2;
+layout(location = 0) out vec4 FragColor;
+layout(location = 1) out vec4 NormalColor;
 
 void main()
 {
@@ -233,7 +230,7 @@ void main()
 
 	//Phong
 	vec3 N = normalize(v_normal);
-	if(u_normalmap_flag ==1){
+	if(u_normalmap_flag ==1){	//Some meshes don't have normalmaps
 		
 		vec3 normal_pixel = texture2D(u_normalmap_texture,v_uv).xyz;
 		N = perturbNormal(N, v_world_position, v_uv, normal_pixel);
@@ -260,7 +257,6 @@ void main()
 				att_factor = u_light_max_distance[i] - light_distance;			//Compute linear att factor
 				att_factor /= u_light_max_distance[i];		//Normalize
 				att_factor = max(att_factor,0.0);		//No negative values
-
 
 			}
 
@@ -325,9 +321,6 @@ uniform vec3 u_camera_position;
 
 uniform vec3 u_ambient_light;
 
-const int MAX_LIGHTS = 5; 
-uniform int u_num_lights;
-
 uniform vec3 u_light_color;
 uniform float u_light_intensity;
 uniform float u_light_max_distance;
@@ -339,13 +332,13 @@ uniform vec3 u_light_position;
 uniform vec3 u_light_direction; 
 
 uniform sampler2D u_shadowmap;
-uniform mat4 u_shadow_viewproj;
+uniform mat4 u_shadow_viewproj;		
 uniform float u_shadow_bias;
 uniform int u_shadowmap_flag;
 
 float computeShadowFactor(sampler2D shadowmap)
 {
-	vec4 proj_pos = u_shadow_viewproj * vec4(v_world_position,1.0); //o v_position?
+	vec4 proj_pos = u_shadow_viewproj * vec4(v_world_position,1.0); //el punt en world, on "cauria" al shadowmap
 
 	//de homogeneus[? ?] a clip space [-1 1]
 	vec2 shadow_uv = proj_pos.xy / proj_pos.w;
@@ -355,7 +348,7 @@ float computeShadowFactor(sampler2D shadowmap)
 	shadow_uv = shadow_uv*0.5 +vec2(0.5);
 
 	//obtenir el depth de -1 1 (no linear) i normalitzar 
-	float real_depth = (proj_pos.z - u_shadow_bias) / proj_pos.w;
+	float real_depth = (proj_pos.z - u_shadow_bias) / proj_pos.w;	//la distancia real a la que esta el punt respecte la camera
 	real_depth = real_depth * 0.5 + 0.5;
 
 	//obtenir depth del shadowmap de 0 1 (no linear)
@@ -364,12 +357,12 @@ float computeShadowFactor(sampler2D shadowmap)
 	//compute final shadow factor by comparing
 	float shadow_factor = 1.0;
 
-	//comparem les dos distancies (no linear). Si realm deth + gran, vol dir que esta mes lluny, pertant
+	//comparem les dos distancies (no linear). Si real depth + gran, vol dir que esta mes lluny, pertant
 	//esta darrere d'algo, pertant te shadow
 	if( shadow_depth < real_depth )
 		shadow_factor = 0.0;
 
-	if(u_light_type == 2){	
+	if(u_light_type == 2){	//directional
 		
 		//it is outside on the sides
 		if( shadow_uv.x < 0.0 || shadow_uv.x > 1.0 ||
@@ -460,13 +453,13 @@ void main()
 		else{	//Outside spot
 			spot_factor = 0.0;
 		}
-	
+		
 		if (u_shadowmap_flag ==1){	//ShadowFactor
 			shadow_factor = computeShadowFactor( u_shadowmap);
 		}
 	}
 
-	vec3 R=normalize(reflect(L,N));
+	//vec3 R=normalize(reflect(L,N));
 
 	float NdotL = clamp( dot(N,L), 0.0,1.0);
 	//float RdotV = pow( clamp(dot(-R,V),0.0,1.0), u_material_shininess );

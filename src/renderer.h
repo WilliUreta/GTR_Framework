@@ -34,6 +34,7 @@ namespace GTR {
 
 		eRenderMode render_mode;
 		bool use_shadowmap;
+		bool show_shadowmap;
 		std::vector<GTR::RenderCall> renderCall_vector;
 		std::vector<GTR::RenderCall> renderCall_blend_vector;
 
@@ -43,7 +44,7 @@ namespace GTR {
 		//...
 
 		//renders several elements of the scene
-		void renderScene(GTR::Scene* scene, Camera* camera);
+		void getSceneRenderCalls(GTR::Scene* scene, Camera* camera);
 	
 		//to render a whole prefab (with all its nodes)
 		void renderPrefab(const Matrix44& model, GTR::Prefab* prefab, Camera* camera);
@@ -55,14 +56,16 @@ namespace GTR {
 
 		//to render one mesh given its material and transformation matrix
 		void renderMeshWithMaterial(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera);
-		void renderMeshWithMaterialSingle(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera);
-		void renderMeshWithMaterialMulti(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera);
+		void renderMeshWithMaterialSingle(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera, Scene* scene, Shader* shader, int normalmap_flag);
+		void renderMeshWithMaterialMulti(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera, Scene* scene, Shader* shader, int normalmap_flag);
 	
 		void renderRenderCall(Camera* camera);
 
 		void generateShadowMaps(GTR::Scene* scene);
 
 		void renderShadowMap(const Matrix44 model, Mesh* mesh, GTR::Material* material, Camera* camera);
+
+		void showShadowMaps( int w, int h);
 
 		void showShadowMap(GTR::LightEntity* light);
 	};

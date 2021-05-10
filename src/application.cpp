@@ -107,24 +107,20 @@ void Application::render(void)
 	//*camera = *scene->light_entities[0]->light_camera;	//camera al lloc de la llum
 	//camera->enable();
 
-	renderer->renderScene(scene, camera);
+	renderer->getSceneRenderCalls(scene, camera);
 	renderer->orderRenderCalls();
 
 	renderer->generateShadowMaps(scene);
 	
 	int w = Application::instance->window_width;
 	int h = Application::instance->window_height;
-	/*glViewport(0, 0, w * 0.3, h * 0.3);	
-	renderer->showShadowMap(scene->light_entities[0]);
-	/*glViewport(0.3*w, 0, w * 0.3, h * 0.3);
-	renderer->showShadowMap(scene->light_entities[1]);
-	
-	glViewport(0.0, h * 0.3, w , h*0.7 );*/
 	
 	camera->enable();
 	renderer->renderRenderCall(camera);		//Main renderer
 
-	//glViewport( 0, 0, w , h );
+	if (renderer->show_shadowmap == 1) {
+		renderer->showShadowMaps(w, h);
+	}
 	
     glDisable(GL_DEPTH_TEST);
     //render anything in the gui after this
@@ -265,6 +261,7 @@ void Application::renderDebugGUI(void)
 	ImGui::ColorEdit3("BG color", scene->background_color.v);
 	ImGui::ColorEdit3("Ambient Light", scene->ambient_light.v);
 	ImGui::Checkbox("Use ShadowMaps", &renderer->use_shadowmap);
+	ImGui::Checkbox("Use ShadowMaps", &renderer->show_shadowmap);
 
 	//add info to the debug panel about the camera
 	if (ImGui::TreeNode(camera, "Camera")) {
@@ -315,6 +312,7 @@ void Application::onKeyDown( SDL_KeyboardEvent event )
 		case SDLK_4: renderer->render_mode = GTR::eRenderMode::SINGLE_PATH; break;
 		case SDLK_6: renderer->render_mode = GTR::eRenderMode::MULTI_PATH; break;
 		case SDLK_7: renderer->use_shadowmap = !renderer->use_shadowmap; break;
+		case SDLK_8: renderer->show_shadowmap = !renderer->show_shadowmap; break;
 	}
 }
 

@@ -49,12 +49,12 @@
 		{
 			"name": "lamp2",
 			"type": "LIGHT",
-			"light_type": "SPOT",
+			"light_type": "DIRECTIONAL",
 			"spot_exponent": 10,
-			"direction": [ -80, 0, -100 ],
+			"direction": [ 400, 300, -500 ],
 			"color": [ 0.0, 1.0, 0.0 ],
-			"position": [ -210, 315, 130 ],
-			"intensity": 1.0
+			"position": [ -210, 1100, 130 ],
+			"intensity": 0.25
 		}
 	]
 }
