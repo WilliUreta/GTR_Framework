@@ -21,7 +21,7 @@ Renderer::Renderer() {
 
 	render_mode = eRenderMode::MULTI_PATH;
 	use_shadowmap = 1;
-	show_shadowmap = 1;
+	show_shadowmap = 0;
 }
 
 

@@ -318,8 +318,7 @@ void Application::onKeyDown( SDL_KeyboardEvent event )
 		case SDLK_3: renderer->render_mode = GTR::eRenderMode::UVS; break;
 		case SDLK_4: renderer->render_mode = GTR::eRenderMode::SINGLE_PATH; break;
 		case SDLK_6: renderer->render_mode = GTR::eRenderMode::MULTI_PATH; break;
-		case SDLK_7: renderer->use_shadowmap = !renderer->use_shadowmap; break;
-		case SDLK_8: renderer->show_shadowmap = !renderer->show_shadowmap; break;
+		case SDLK_7: renderer->show_shadowmap = !renderer->show_shadowmap; break;
 	}
 }
 

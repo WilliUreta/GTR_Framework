@@ -201,8 +201,8 @@ GTR::LightEntity::LightEntity()
 	max_distance = 1500.0;
 	cone_angle = 40;
 	area_size = 50;
+	spot_exponent = 10;
 
-	viewprojection_matrix.setIdentity();
 	fbo = new FBO();
 	//fbo->setDepthOnly(1024, 1024);
 	fbo->setDepthOnly(2048, 2048);
